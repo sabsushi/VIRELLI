@@ -1,0 +1,11 @@
+# Cache do Python
+**/__pycache__/
+*.pyc
+
+# Base de dados local (SQLite)
+backend/virelli.db
+
+# Pastas de configuração do ambiente virtual (caso apareçam)
+.venv/
+env/
+venv/

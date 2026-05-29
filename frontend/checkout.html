@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <title>Checkout — VIRELLI</title>
+</head>
+<body>
+  <nav>
+    <a href="index.html">VIRELLI</a>
+    <div style="display:flex;gap:2rem;">
+      <a href="catalog.html">Shop</a>
+      <a href="checkout.html">Cart (<span id="cart-count">0</span>)</a>
+    </div>
+  </nav>
+  <main>
+    <div class="checkout-wrap">
+      <div>
+        <h2 style="margin-bottom:1rem;font-weight:400;">Your Cart</h2>
+        <div id="cart-items"></div>
+      </div>
+      <div>
+        <h2 style="margin-bottom:1rem;font-weight:400;">Order Details</h2>
+        <form id="checkout-form">
+          <input type="text" id="name" placeholder="Full name" required>
+          <input type="email" id="email" placeholder="Email address" required>
+          <input type="text" id="address" placeholder="Delivery address" required>
+          <button type="submit" class="btn" style="margin-top:1rem;">Place Order</button>
+        </form>
+        <div id="confirmation" style="display:none;">
+          <p>Order placed! Thank you for shopping with VIRELLI.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="js/cart.js"></script>
+</body>
+</html>

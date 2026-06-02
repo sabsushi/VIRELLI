@@ -1,44 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
-  let userData = JSON.parse(localStorage.getItem("VIRELLI_USER")) || {
-    name: "Sabrina El-Aouar",
-    email: "sabrina@virellistudio.com",
-    address: "Avenida da Liberdade 142, Lisbon, Portugal"
-  };
+  let session = JSON.parse(localStorage.getItem("VIRELLI_SESSION"));
+
+  if (!session) {
+    window.location.href = "auth.html";
+    return;
+  }
 
   const displayBox = document.getElementById("profile-display");
-  const infoForm = document.getElementById("profile-info-form");
-  const passwordForm = document.getElementById("password-form");
-
-  function renderProfile() {
-    if (displayBox) {
-      displayBox.innerHTML = `
-        <p><strong>Full Name:</strong> ${userData.name}</p>
-        <p><strong>Email:</strong> ${userData.email}</p>
-        <p><strong>Address:</strong> ${userData.address}</p>
-      `;
-    }
+  if (displayBox) {
+    displayBox.innerHTML = `
+      <p><strong>Account Privilege:</strong> ${session.role.toUpperCase()}</p>
+      <p><strong>Full Name:</strong> ${session.name}</p>
+      <p><strong>Email Address:</strong> ${session.email}</p>
+      <p><strong>Default Address:</strong> ${session.address || 'Not Configured'}</p>
+      <button class="btn" onclick="executeLogout()" style="margin-top:1.5rem; padding: 0.5rem 1.5rem; font-size: 0.75rem; background:#8c8c8c; border-color:#8c8c8c; color: white;">Sign Out</button>
+    `;
   }
-
-  if (infoForm) {
-    document.getElementById("profile-email").value = userData.email;
-    document.getElementById("profile-address").value = userData.address;
-    infoForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      userData.email = document.getElementById("profile-email").value;
-      userData.address = document.getElementById("profile-address").value;
-      localStorage.setItem("VIRELLI_USER", JSON.stringify(userData));
-      renderProfile();
-      alert("Account information updated successfully inside LocalStorage.");
-    });
-  }
-
-  if (passwordForm) {
-    passwordForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      alert("Security credentials updated successfully.");
-      passwordForm.reset();
-    });
-  }
-
-  renderProfile();
 });
+
+function executeLogout() {
+  localStorage.removeItem("VIRELLI_SESSION");
+  window.location.href = "index.html";
+}

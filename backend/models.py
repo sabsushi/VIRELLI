@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from database import Base
 
 class Product(Base):
@@ -10,6 +10,7 @@ class Product(Base):
     price = Column(Float, nullable=False)
     image_url = Column(String)
     category = Column(String)
+    sizes = Column(String, nullable=True)
 
 class User(Base):
     __tablename__ = "users"
@@ -18,3 +19,13 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+
+class WishlistItem(Base):
+    __tablename__ = "wishlist_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
+    size = Column(String, nullable=True)
+    added_at = Column(String, nullable=True)
+

@@ -2,14 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Product
+from schemas import ProductBase, ProductResponse
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
-@router.get("/")
+@router.get("/", response_model=ProductBase)
 def get_all_products(db: Session = Depends(get_db)):
     return db.query(Product).all()
 
-@router.get("/{product_id}")
+@router.get("/{product_id}", response_model=ProductResponse)
 def get_product_detail(product_id: int, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:

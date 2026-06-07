@@ -1,7 +1,7 @@
 // =======================================================
 // CENTRAL ISOLATED OVERRIDE CONTROL TOGGLE SWITCH
 // =======================================================
-const USE_BACKEND_API = false; 
+const USE_BACKEND_API = true; 
 const BACKEND_URL = "http://localhost:8000"; 
 
 // =======================================================

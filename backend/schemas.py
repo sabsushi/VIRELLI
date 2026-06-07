@@ -7,7 +7,8 @@ class ProductBase(BaseModel):
     price: float
     image_url: Optional[str] = None
     category: Optional[str] = None
-
+    sizes: Optional[str] = None
+    
 class ProductResponse(ProductBase):
     id: int
 

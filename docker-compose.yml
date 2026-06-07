@@ -10,3 +10,11 @@ services:
       - ./backend:/app
     environment:
       - DATABASE_URL=sqlite:///./virelli.db
+
+  frontend:
+    image: nginx:alpine
+    container_name: virelli_frontend
+    ports:
+      - "80:80"  
+    volumes:
+      - ./frontend:/usr/share/nginx/html 

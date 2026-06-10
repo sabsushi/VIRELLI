@@ -1,3 +1,6 @@
+const API_URL = "http://localhost:8000/auth";
+
+
 function switchAuthTab(target) {
   document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("active"));
   document.querySelectorAll(".auth-form").forEach(f => f.classList.remove("active"));
@@ -9,54 +12,96 @@ function switchAuthTab(target) {
 document.addEventListener("DOMContentLoaded", () => {
   const signInForm = document.getElementById("form-signin");
   const signUpForm = document.getElementById("form-signup");
+  const API_URL = "http://localhost:8000"; // Backend FastAPI address
 
   if (signInForm) {
-    signInForm.addEventListener("submit", (e) => {
+    signInForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("signin-email").value.trim();
       const password = document.getElementById("signin-password").value;
 
       // Master Admin Account Control Criteria
       if (email === "admin@virelli.com" && password === "admin123") {
-        const adminSession = { name: "System Administrator", email: email, role: "admin" };
+        const adminSession = { name: "System Administrator", email: email, role: "admin", token: "admin" };
         localStorage.setItem("VIRELLI_SESSION", JSON.stringify(adminSession));
         alert("Access Granted: Admin Dashboard online.");
         window.location.href = "admin.html";
         return;
       }
 
-      const registeredUsers = JSON.parse(localStorage.getItem("VIRELLI_USER_DB")) || [];
-      const matchedUser = registeredUsers.find(user => user.email === email && user.password === password);
+      // --- REAL LOGIN CONNECTED TO PYTHON BACKEND ---
+      try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email: email, password: password })
+        });
 
-      if (matchedUser) {
-        const userSession = { name: matchedUser.name, email: matchedUser.email, role: "user", address: "Avenida da Liberdade, Lisbon" };
-        localStorage.setItem("VIRELLI_SESSION", JSON.stringify(userSession));
-        alert(`Welcome back, ${matchedUser.name}!`);
-        window.location.href = "user.html";
-      } else {
-        alert("Invalid credentials. Use admin@virelli.com / admin123, or create a customer account.");
+        if (response.ok) {
+          const data = await response.json();
+          // The access_token now contains just the user ID string (e.g., "1")
+          const userId = data.access_token; 
+
+          // Quick fetch to get user details using the new ID parameter
+          const userResponse = await fetch(`${API_URL}/users/me?user_id=${userId}`);
+          const userData = await userResponse.json();
+
+          const userSession = { 
+            id: userId,
+            name: userData.username, 
+            email: userData.email, 
+            role: "user" 
+          };
+          
+          localStorage.setItem("VIRELLI_SESSION", JSON.stringify(userSession));
+          alert(`Welcome back, ${userData.username}!`);
+          window.location.href = "user.html";
+
+        } else {
+          const errorData = await response.json();
+          alert(`Login failed: ${errorData.detail || "Invalid credentials."}`);
+        }
+      } catch (error) {
+        console.error("Connection error:", error);
+        alert("Could not connect to the backend server. Please make sure Python is running!");
       }
     });
   }
 
   if (signUpForm) {
-    signUpForm.addEventListener("submit", (e) => {
+    signUpForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const name = document.getElementById("signup-name").value.trim();
       const email = document.getElementById("signup-email").value.trim();
       const password = document.getElementById("signup-password").value;
 
-      let registeredUsers = JSON.parse(localStorage.getItem("VIRELLI_USER_DB")) || [];
-      
-      if (registeredUsers.some(user => user.email === email) || email === "admin@virelli.com") {
-        alert("An account with this email address already exists.");
-        return;
-      }
+      // --- REAL REGISTER CONNECTED TO PYTHON BACKEND ---
+      try {
+        const response = await fetch(`${API_URL}/auth/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username: name, // Python backend expects 'username'
+            email: email,
+            password: password
+          })
+        });
 
-      registeredUsers.push({ name, email, password });
-      localStorage.setItem("VIRELLI_USER_DB", JSON.stringify(registeredUsers));
-      alert("Account created successfully!");
-      switchAuthTab("signin");
+        if (response.status === 201) { // 201 Created Status
+          alert("Account created successfully on the local server!");
+          switchAuthTab("signin");
+        } else {
+          const errorData = await response.json();
+          alert(`Registration failed: ${errorData.detail || "Please check your inputs."}`);
+        }
+      } catch (error) {
+        console.error("Connection error:", error);
+        alert("Could not connect to the backend server. Make sure Uvicorn is active!");
+      }
     });
   }
 });

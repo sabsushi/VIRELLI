@@ -1,6 +1,7 @@
 ﻿from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import products, wishlist, checkout, auth, users
+from routes import auth
 
 app = FastAPI(
     title="Virelli API",

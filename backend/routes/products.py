@@ -2,11 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Product
-from schemas import ProductBase, ProductResponse
+from schemas import ProductResponse
+from typing import List
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
-@router.get("/", response_model=ProductBase)
+@router.get("/", response_model=List[ProductResponse])
 def get_all_products(db: Session = Depends(get_db)):
     return db.query(Product).all()
 

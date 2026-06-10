@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="VIRELLI — Admin panel.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <title>Admin Dashboard — VIRELLI</title>
+</head>
+<body>
+
+  <nav class="main-nav">
+    <div class="nav-left"><a href="index.html" class="logo">VIRELLI Dashboard</a></div>
+    <div class="nav-right">
+      <button class="btn" onclick="executeLogout()" style="padding: 0.5rem 1.5rem; font-size: 0.7rem;">Sign Out</button>
+    </div>
+  </nav>
+
+  <main class="profile-container" id="admin-restricted-content" style="display:none;">
+    <header class="profile-header">
+      <h1>Inventory Management</h1>
+      <p style="color: var(--grey-mid); font-size: 0.85rem; margin-top: 0.5rem;">Add new seasonal clothes and monitor mock inventory instances.</p>
+    </header>
+
+    <div class="profile-grid" style="grid-template-columns: 1fr 1.2fr;">
+      <div class="profile-card">
+        <h2>Add New Clothing Item</h2>
+        <form id="admin-add-product-form" style="display:flex; flex-direction:column; gap:1rem;">
+          <input type="text" id="prod-name" placeholder="Item Name" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
+          <input type="text" id="prod-price" placeholder="Price (e.g., € 299.00)" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
+          <textarea id="prod-desc" placeholder="Product Description Detail..." required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem; font-family:var(--font); height:100px; resize:none;"></textarea>
+          <button type="submit" class="btn">Publish to Catalog</button>
+        </form>
+      </div>
+
+      <div class="profile-card">
+        <h2>Live Catalog Registry</h2>
+        <div id="admin-inventory-list" style="display:flex; flex-direction:column; gap:1rem; max-height:450px; overflow-y:auto; padding-right:0.5rem;"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script>
+    (async function() {
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+      }
+
+      const activeUser = JSON.parse(localStorage.getItem("VIRELLI_SESSION"));
+      if (!activeUser || activeUser.role !== "admin") {
+        alert("Access Denied: Administrative Clearance Required.");
+        window.location.href = "auth.html";
+        return;
+      }
+      
+      document.getElementById("admin-restricted-content").style.display = "block";
+      renderAdminInventory();
+
+      const addForm = document.getElementById("admin-add-product-form");
+      if (addForm) {
+        addForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = document.getElementById("prod-name").value;
+          const price = document.getElementById("prod-price").value;
+          const description = document.getElementById("prod-desc").value;
+
+          let dynamicCatalog = JSON.parse(localStorage.getItem("VIRELLI_EXTENDED_INVENTORY")) || [];
+          const nextId = 4 + dynamicCatalog.length;
+
+          const newProduct = { id: nextId, name, price, description };
+          dynamicCatalog.push(newProduct);
+          localStorage.setItem("VIRELLI_EXTENDED_INVENTORY", JSON.stringify(dynamicCatalog));
+
+          addForm.reset();
+          renderAdminInventory();
+          alert("New clothing item published successfully!");
+        });
+      }
+    })();
+
+    async function renderAdminInventory() {
+      const displayContainer = document.getElementById("admin-inventory-list");
+      if (!displayContainer) return;
+
+      const items = await apiGetAllProducts();
+      displayContainer.innerHTML = items.map(item => `
+        <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid var(--grey-light); padding:1rem; background:#fafafa;">
+          <div>
+            <h4 style="font-size:0.85rem; text-transform:uppercase;">${item.name}</h4>
+            <p style="font-size:0.8rem; color:var(--grey-mid);">${item.price}</p>
+          </div>
+          <button class="btn" onclick="deleteProduct(${item.id})" style="padding:0.4rem 0.8rem; font-size:0.65rem; background:#cc3333; border-color:#cc3333; color: white;">Remove</button>
+        </div>
+      `).join("");
+    }
+
+    window.deleteProduct = function(id) {
+      if(id <= 3) {
+        alert("Protected Base Record: Cannot delete hardcoded structural seed items (IDs 1-3).");
+        return;
+      }
+      let dynamicCatalog = JSON.parse(localStorage.getItem("VIRELLI_EXTENDED_INVENTORY")) || [];
+      dynamicCatalog = dynamicCatalog.filter(p => p.id !== id);
+      localStorage.setItem("VIRELLI_EXTENDED_INVENTORY", JSON.stringify(dynamicCatalog));
+      renderAdminInventory();
+    }
+
+    function executeLogout() {
+      localStorage.removeItem('VIRELLI_SESSION');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

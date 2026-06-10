@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="VIRELLI — Minimal luxury streetwear. Shop the latest collection.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <title>VIRELLI — Official Store</title>
+</head>
+<body>
+
+
+  <main>
+    <section class="hero-banner">
+      <span class="hero-placeholder-label">Hero Banner Placeholder [1600 × 600]</span>
+      <div class="hero-overlay-content">
+        <h1>New Architecture</h1>
+        <p class="hero-season">Summer 2026</p>
+        <a href="catalog.html" class="btn-shop-now">Go To Shop</a>
+      </div>
+    </section>
+
+    <section class="home-featured">
+      <div id="home-featured-items" class="featured-carousel-grid"></div>
+      <div class="carousel-controls">
+        <button class="control-btn" aria-label="Previous item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button class="control-btn" aria-label="Next item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+    </section>
+  </main>
+
+
+  <script src="js/api.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/render.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      injectLayout('home');
+      initLiveSearch();
+    });
+  </script>
+</body>
+</html>

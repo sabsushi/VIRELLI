@@ -9,8 +9,8 @@
 :root {
   --black: #111111;
   --white: #fbfbfb;
-  --grey-dark: #444444; /* Replaced deep black for buttons */
-  --grey-hover: #666666; /* Softer hover accent */
+  --grey-dark: #444444;
+  --grey-hover: #666666;
   --grey-light: #e8e8e8;
   --grey-mid: #8c8c8c;
   --font: 'Inter', sans-serif;
@@ -32,7 +32,6 @@ body {
 a { text-decoration: none; color: inherit; }
 button { cursor: pointer; border: none; background: none; font-family: var(--font); color: inherit; }
 
-/* --- Premium Luxury Navigation Bar --- */
 .main-nav {
   display: flex;
   justify-content: space-between;
@@ -192,7 +191,6 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   margin: 0 auto;
 }
 
-/* --- Modular Text Product Cards --- */
 .product-card { 
   display: flex; 
   flex-direction: column; 
@@ -202,7 +200,6 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   background: #ffffff;
 }
 
-/* Generic Image Placeholder Box */
 .image-placeholder {
   width: 100%;
   background: #f0f0f0;
@@ -241,7 +238,6 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   border-color: var(--grey-dark);
 }
 
-/* --- Quantity Counter Component --- */
 .qty-stepper {
   display: inline-flex;
   border: 1px solid var(--grey-light);
@@ -261,7 +257,6 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   text-align: center;
 }
 
-/* --- Favorites Modal Drawer --- */
 .fav-modal {
   position: fixed;
   top: 0;
@@ -284,12 +279,87 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 .fav-item-row { display: flex; gap: 1rem; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid #f9f9f9; }
 .fav-item-row .image-placeholder { width: 60px; height: 60px; flex-shrink: 0; }
 
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 110;
+  position: absolute;
+  right: var(--spacing-lg);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.nav-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--black);
+  transition: all 0.25s ease;
+}
+
 @media (max-width: 1024px) {
-  .main-nav { flex-direction: column; gap: var(--spacing-md); }
-  .nav-left { flex-direction: column; gap: var(--spacing-sm); }
   #product-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
 @media (max-width: 768px) {
+  
+  .nav-hamburger { display: flex; }
+
+  .main-nav {
+    position: relative;
+    flex-wrap: wrap;
+    padding: 0 var(--spacing-lg);
+  }
+
+  
+  .nav-left {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    position: relative;
+  }
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0 1rem;
+    border-top: 1px solid var(--grey-light);
+  }
+  .nav-right {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    padding: 0.75rem 0 1rem;
+    gap: 1rem;
+    border-top: 1px solid var(--grey-light);
+  }
+  
+  .main-nav.nav-open .nav-links,
+  .main-nav.nav-open .nav-right { display: flex; }
+
+  
+  .main-nav.nav-open .nav-hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .main-nav.nav-open .nav-hamburger span:nth-child(2) { opacity: 0; }
+  .main-nav.nav-open .nav-hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
   #product-grid { grid-template-columns: 1fr; }
   .fav-modal { width: 100%; right: -100%; }
+
+  
+  .search-wrapper { width: 100%; }
+  .search-wrapper input { width: 100%; box-sizing: border-box; }
+}
+
+@media (max-width: 480px) {
+  .home-featured-grid { grid-template-columns: 1fr; }
+  .carousel-product-card { min-width: 100%; }
+  .footer-links-group { grid-template-columns: 1fr; }
 }

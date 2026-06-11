@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
+  <meta name="description" content="VIRELLI — Your account.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="styles/components.css">
   <title>Account — VIRELLI</title>
 </head>
+
 <body>
 
   <nav class="main-nav">
@@ -21,20 +24,34 @@
       <div class="search-wrapper">
         <input type="text" placeholder="Search">
         <button class="search-btn" aria-label="Search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
         </button>
       </div>
       <div class="nav-icons">
         <button class="icon-link" id="fav-toggle-btn" aria-label="Favorites">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+            </path>
+          </svg>
           <span id="fav-count">0</span>
         </button>
         <a href="checkout.html" class="icon-link" aria-label="Cart">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
           <span id="cart-count">0</span>
         </a>
         <a href="user.html" class="icon-link" aria-label="Account">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
         </a>
       </div>
     </div>
@@ -49,15 +66,19 @@
   </div>
 
   <main class="profile-container">
-    <header class="profile-header"><h1>My Account</h1></header>
+    <header class="profile-header">
+      <h1>My Account</h1>
+    </header>
     <div class="profile-grid">
       <div class="profile-card">
         <h2>Personal Information</h2>
         <div class="profile-info-display" id="profile-display"></div>
         <form id="profile-info-form">
           <div class="form-section-title">Update Details</div>
-          <input type="email" id="profile-email" required style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
-          <input type="text" id="profile-address" required style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
+          <input type="email" id="profile-email" required
+            style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
+          <input type="text" id="profile-address" required
+            style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
           <button type="submit" class="btn" style="padding: 0.6rem 1.5rem; font-size:0.7rem;">Save Details</button>
         </form>
       </div>
@@ -65,8 +86,10 @@
         <h2>Security</h2>
         <form id="password-form">
           <div class="form-section-title">Change Password</div>
-          <input type="password" id="current-pass" placeholder="Current Password" required style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
-          <input type="password" id="new-pass" placeholder="New Password" required style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
+          <input type="password" id="current-pass" placeholder="Current Password" required
+            style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
+          <input type="password" id="new-pass" placeholder="New Password" required
+            style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
           <button type="submit" class="btn" style="padding: 0.6rem 1.5rem; font-size:0.7rem;">Update Password</button>
         </form>
       </div>
@@ -100,4 +123,5 @@
   <script src="js/cart.js"></script>
   <script src="js/user.js"></script>
 </body>
+
 </html>

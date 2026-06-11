@@ -2,312 +2,316 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="description" content="VIRELLI Catalog — Browse and filter our full collection.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="styles/components.css">
   <title>Products — VIRELLI</title>
   <style>
-    /* Accordion Sidebar Styling */
-    .filter-section {
-      border-bottom: 1px dashed var(--grey-light);
-      padding: 1.25rem 0;
-    }
-    .filter-header {
-      width: 100%;
-      background: transparent;
-      border: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font);
-      font-size: 0.85rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      padding: 0;
-      color: var(--black);
-    }
-    .filter-content {
-      margin-top: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    /* Size Boxes */
-    .size-grid {
+    .catalog-layout {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 0.4rem;
+      grid-template-columns: 260px 1fr;
+      gap: 3.5rem;
+      padding: 3rem var(--spacing-lg);
+      max-width: 1400px;
+      margin: 0 auto;
     }
-    .size-box {
-      border: 1px solid var(--grey-light);
-      background: #ffffff;
-      padding: 0.6rem 0;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      font-family: var(--font);
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-    }
-    .size-box:hover, .size-box.active {
-      border-color: var(--black);
-      background: #000000;
-      color: #ffffff;
-    }
-    /* Checkboxes & List Text */
-    .filter-label {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 0.85rem;
-      color: var(--grey-dark);
-      cursor: pointer;
-    }
-    .filter-label input[type="checkbox"] {
-      accent-color: var(--black);
-      cursor: pointer;
-    }
-    .count-span {
-      color: #3b5998; /* Classic subtle blueprint blue for counts seen in references */
-      font-size: 0.8rem;
-      margin-left: auto;
-    }
-    .collection-btn-link {
-      background: transparent;
-      border: none;
-      font-family: var(--font);
-      font-size: 0.85rem;
-      text-align: left;
-      padding: 0;
-      color: var(--grey-dark);
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .collection-btn-link:hover, .collection-btn-link.active {
+    
+    .filter-section { border-bottom: 1px dashed var(--grey-light); padding: 1.25rem 0; }
+    .filter-header {
+      width: 100%; background: transparent; border: none;
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: var(--font); font-size: 0.85rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; padding: 0;
       color: var(--black);
-      font-weight: 500;
+    }
+    .filter-content { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .size-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.4rem; }
+    .size-box {
+      border: 1px solid var(--grey-light); background: #ffffff;
+      padding: 0.6rem 0; font-size: 0.75rem; text-transform: uppercase;
+      font-family: var(--font); cursor: pointer; text-align: center; transition: all 0.2s;
+    }
+    .size-box:hover, .size-box.active { border-color: var(--black); background: #000; color: #fff; }
+    
+    .filter-label {
+      display: flex; align-items: center; gap: 0.75rem;
+      font-size: 0.85rem; color: var(--grey-dark); cursor: pointer;
+    }
+    .filter-label input[type="checkbox"] { accent-color: var(--black); cursor: pointer; }
+    .count-span { color: var(--grey-mid); font-size: 0.8rem; margin-left: auto; }
+    .collection-btn-link {
+      background: transparent; border: none; font-family: var(--font);
+      font-size: 0.85rem; text-align: left; padding: 0;
+      color: var(--grey-dark); cursor: pointer; transition: color 0.2s;
+    }
+    .collection-btn-link:hover, .collection-btn-link.active { color: var(--black); font-weight: 500; }
+    
+    #catalog-products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 3rem 2rem;
+    }
+    .catalog-card {
+      display: flex; flex-direction: column; background: #ffffff;
+    }
+    .catalog-card .card-image {
+      width: 100%; height: 380px; background: #fafafa;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem; color: var(--grey-mid); font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      border: 1px solid #f5f5f5; overflow: hidden;
+    }
+    .catalog-card .card-meta {
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .catalog-card .card-name { font-size: 0.85rem; font-weight: 500; color: var(--black); text-transform: capitalize; margin: 0; }
+    .catalog-card .card-sub { font-size: 0.75rem; color: var(--grey-mid); text-transform: uppercase; }
+    .catalog-card .card-price { font-size: 0.85rem; font-weight: 500; color: var(--black); }
+    .catalog-card .btn {
+      margin-top: 1rem; font-size: 0.7rem; padding: 0.65rem 1rem;
+      letter-spacing: 0.1em; background: #000; color: #fff; border: 1px solid #000; width: 100%;
+    }
+    .active-filters-bar {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; min-height: 28px;
+    }
+    .active-filter-tag {
+      background: var(--black); color: #fff; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 0.25rem 0.65rem; display: flex; align-items: center; gap: 0.4rem; cursor: pointer;
+    }
+    .active-filter-tag span { font-size: 0.9rem; line-height: 1; }
+    @media (max-width: 900px) {
+      .catalog-layout { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <nav class="main-nav">
-    <div class="nav-left">
-      <a href="index.html" class="logo">VIRELLI</a>
-      <div class="nav-links">
-        <a href="catalog.html" class="active">New</a>
-        <a href="catalog.html">Collections</a>
-      </div>
-    </div>
-    <div class="nav-right">
-      <div class="nav-icons">
-        <a href="checkout.html" class="icon-link" aria-label="Cart">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-          <span id="cart-count">0</span>
-        </a>
-        <a href="auth.html" class="icon-link" aria-label="Account">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        </a>
-      </div>
-    </div>
-  </nav>
+  
 
-  <main class="catalog-layout" style="display: grid; grid-template-columns: 260px 1fr; gap: 3.5rem; padding: 3rem var(--spacing-lg); max-width: 1400px; margin: 0 auto; font-family: var(--font);">
-    
+  <main class="catalog-layout">
+
     <aside class="filter-sidebar">
-      <h2 style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0; margin-bottom: 1.5rem; font-weight: 500;">Filters</h2>
-      
-      <div class="filter-section" style="border-top: 1px dashed var(--grey-light);">
-        <button class="filter-header" onclick="toggleAccordion('content-size')">Size <span>&minus;</span></button>
+      <h2 style="font-size:1.1rem;text-transform:uppercase;letter-spacing:0.1em;margin-top:0;margin-bottom:1.5rem;font-weight:500;">Filters</h2>
+
+      <div class="filter-section" style="border-top:1px dashed var(--grey-light);">
+        <button class="filter-header" onclick="toggleAccordion('content-size')">Size <span id="ind-size">&minus;</span></button>
         <div id="content-size" class="filter-content">
           <div class="size-grid">
-            <div class="size-box">xs</div>
-            <div class="size-box">s</div>
-            <div class="size-box">m</div>
-            <div class="size-box">l</div>
-            <div class="size-box">xl</div>
-            <div class="size-box">2x</div>
+            <div class="size-box" data-size="xs">XS</div>
+            <div class="size-box" data-size="s">S</div>
+            <div class="size-box" data-size="m">M</div>
+            <div class="size-box" data-size="l">L</div>
+            <div class="size-box" data-size="xl">XL</div>
+            <div class="size-box" data-size="2x">2X</div>
           </div>
         </div>
       </div>
 
       <div class="filter-section">
-        <button class="filter-header" onclick="toggleAccordion('content-avail')">Availability <span>&minus;</span></button>
-        <div id="content-avail" class="filter-content">
-          <label class="filter-label"><input type="checkbox" checked> Availability <span class="count-span">(450)</span></label>
-          <label class="filter-label"><input type="checkbox"> Out Of Stock <span class="count-span">(18)</span></label>
+        <button class="filter-header" onclick="toggleAccordion('content-cat')">Category <span id="ind-cat">&plus;</span></button>
+        <div id="content-cat" class="filter-content" style="display:none;">
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="tshirts"> T-Shirts</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="shirts"> Shirts</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="outerwear"> Outerwear</label>
         </div>
       </div>
 
       <div class="filter-section">
-        <button class="filter-header" onclick="toggleAccordion('content-cat')">Category <span>&plus;</span></button>
-        <div id="content-cat" class="filter-content" style="display: none;">
-          <label class="filter-label"><input type="checkbox"> T-Shirts</label>
-          <label class="filter-label"><input type="checkbox"> Shirts</label>
-          <label class="filter-label"><input type="checkbox"> Outerwear</label>
+        <button class="filter-header" onclick="toggleAccordion('content-color')">Colors <span id="ind-color">&plus;</span></button>
+        <div id="content-color" class="filter-content" style="display:none;">
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="color" data-value="white"> Off-White</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="color" data-value="black"> Core Black</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="color" data-value="charcoal"> Charcoal Pattern</label>
         </div>
       </div>
 
       <div class="filter-section">
-        <button class="filter-header" onclick="toggleAccordion('content-color')">Colors <span>&plus;</span></button>
-        <div id="content-color" class="filter-content" style="display: none;">
-          <label class="filter-label"><input type="checkbox"> Off-White</label>
-          <label class="filter-label"><input type="checkbox"> Core Black</label>
-          <label class="filter-label"><input type="checkbox"> Charcoal Pattern</label>
+        <button class="filter-header" onclick="toggleAccordion('content-price')">Price Range <span id="ind-price">&plus;</span></button>
+        <div id="content-price" class="filter-content" style="display:none;">
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="price" data-value="100-200"> €100 – €200</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="price" data-value="200-400"> €200 – €400</label>
         </div>
       </div>
 
       <div class="filter-section">
-        <button class="filter-header" onclick="toggleAccordion('content-price')">Price Range <span>&plus;</span></button>
-        <div id="content-price" class="filter-content" style="display: none;">
-          <label class="filter-label"><input type="checkbox"> € 100 - € 200</label>
-          <label class="filter-label"><input type="checkbox"> € 200 - € 400</label>
-        </div>
-      </div>
-
-      <div class="filter-section">
-        <button class="filter-header" onclick="toggleAccordion('content-colls')">Collections <span>&minus;</span></button>
+        <button class="filter-header" onclick="toggleAccordion('content-colls')">Collections <span id="ind-colls">&minus;</span></button>
         <div id="content-colls" class="filter-content">
-          <button class="collection-btn-link active" id="coll-all" onclick="filterByCollection('all')">All Pieces</button>
-          <button class="collection-btn-link" id="coll-summer" onclick="filterByCollection('summer')">Summer 2026</button>
-          <button class="collection-btn-link" id="coll-essentials" onclick="filterByCollection('essentials')">Minimalist Essentials</button>
+          <button class="collection-btn-link active" id="coll-all" onclick="setCollection('all')">All Pieces</button>
+          <button class="collection-btn-link" id="coll-summer" onclick="setCollection('summer')">Summer 2026</button>
+          <button class="collection-btn-link" id="coll-essentials" onclick="setCollection('essentials')">Minimalist Essentials</button>
         </div>
       </div>
 
-      <div class="filter-section">
-        <button class="filter-header" onclick="toggleAccordion('content-tags')">Tags <span>&plus;</span></button>
-        <div id="content-tags" class="filter-content" style="display: none;">
-          <span style="font-size:0.8rem; color:var(--grey-mid);">No active filter tags loaded</span>
-        </div>
-      </div>
-
-      <div class="filter-section">
-        <button class="filter-header" onclick="toggleAccordion('content-rate')">Ratings <span>&plus;</span></button>
-        <div id="content-rate" class="filter-content" style="display: none;">
-          <span style="font-size:0.8rem; color:var(--grey-mid);">Five Stars Only</span>
-        </div>
-      </div>
+      
+      <button class="filter-apply-btn" onclick="applyFilters()">Apply Filters</button>
     </aside>
 
     <section class="products-zone">
-      <div style="margin-bottom: 2rem;">
-        <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--grey-mid); margin: 0 0 0.5rem 0;">Home / Products</p>
-        <h1 style="font-size: 1.6rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 400; color: var(--black); margin: 0 0 1.5rem 0;">Products</h1>
-        
-        <div style="position: relative; width: 100%; max-width: 400px; margin-bottom: 2.5rem;">
-          <input type="text" placeholder="Search" style="width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; border: none; background: #fafafa; font-family: var(--font); font-size: 0.85rem; outline: none;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--grey-mid);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </div>
+      <p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--grey-mid);margin:0 0 0.5rem 0;">Home / Products</p>
+      <h1 style="font-size:1.6rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:400;color:var(--black);margin:0 0 1.5rem 0;">Products</h1>
+
+      
+      <div style="position:relative;width:100%;max-width:400px;margin-bottom:1.5rem;">
+        <input type="text" id="catalog-search" placeholder="Search within products…"
+          style="width:100%;padding:0.8rem 1rem 0.8rem 2.5rem;border:none;background:#fafafa;font-family:var(--font);font-size:0.85rem;outline:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--grey-mid);">
+          <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
       </div>
 
-      <div id="catalog-products-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 3rem 2rem;">
-        </div>
+      
+      <div id="active-filters-bar" class="active-filters-bar"></div>
+
+      <div id="catalog-products-grid"></div>
     </section>
   </main>
 
-  <footer class="main-footer" style="border-top: 1px solid var(--grey-light); margin-top: 6rem; padding: 4rem 0 2rem 0; font-family: var(--font); background: #ffffff;">
-    <div class="footer-container" style="max-width: 1200px; margin: 0 auto; padding: 0 var(--spacing-lg); display: grid; grid-template-columns: 1.5fr 1fr; gap: 4rem;">
-      <div class="footer-brand" style="display: flex; flex-direction: column; gap: 1rem;">
-        <span class="footer-logo" style="font-size: 1.1rem; font-weight: 600; letter-spacing: 0.2em; color: var(--black);">VIRELLI</span>
-        <p style="font-size: 0.85rem; color: var(--grey-dark); line-height: 1.6; max-width: 400px; margin: 0;">
-          Minimal urban aesthetics engineered for focus. This project is an academic frontend interface developed natively for evaluation.
-        </p>
-      </div>
-      <div class="footer-links-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-        <div class="footer-column" style="display: flex; flex-direction: column; gap: 0.8rem;">
-          <h4 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--black); font-weight: 600; margin-bottom: 0.5rem;">Collection</h4>
-          <a href="catalog.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none;">New Arrivals</a>
-          <a href="catalog.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none;">All Clothing</a>
-        </div>
-        <div class="footer-column" style="display: flex; flex-direction: column; gap: 0.8rem;">
-          <h4 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--black); font-weight: 600; margin-bottom: 0.5rem;">About</h4>
-          <a href="about.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none; font-weight: 500;">Our Studio</a>
-          <a href="about.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none; font-weight: 500;">Contact Us</a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom" style="max-width: 1200px; margin: 3rem auto 0 auto; padding: 1.5rem var(--spacing-lg) 0 var(--spacing-lg); border-top: 1px solid var(--grey-light); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--grey-mid);">
-      <p>&copy; 2026 VIRELLI Studio. All Rights Reserved.</p>
-      <p style="text-transform: uppercase; letter-spacing: 0.05em;">
-        Designed by <strong>Sabrina & Tiago</strong> &mdash; <strong>ETIC_Algarve Web Programming</strong>
-      </p>
-    </div>
-  </footer>
+  
 
   <script src="js/api.js"></script>
+  <script src="js/components.js"></script>
   <script src="js/cart.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      filterByCollection('all');
+    let allProducts = [];
+    let activeCollection = 'all';
+    let activeFilters = { size: [], category: [], color: [], price: [] };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      injectLayout('catalog');
+      initLiveSearch();
+      allProducts = await apiGetAllProducts();
+
       
-      // Wire simple local selection loops to size filters
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchParam = urlParams.get('search');
+      if (searchParam) {
+        document.getElementById('catalog-search').value = decodeURIComponent(searchParam);
+      }
+
+      renderGrid();
+      window.refreshGridUI = renderGrid;
+
+      
       document.querySelectorAll('.size-box').forEach(box => {
         box.addEventListener('click', () => {
           box.classList.toggle('active');
+          const sz = box.dataset.size;
+          const idx = activeFilters.size.indexOf(sz);
+          idx > -1 ? activeFilters.size.splice(idx, 1) : activeFilters.size.push(sz);
         });
       });
+
+      
+      const catalogSearch = document.getElementById('catalog-search');
+      if (catalogSearch) {
+        catalogSearch.addEventListener('input', renderGrid);
+      }
     });
 
     function toggleAccordion(id) {
       const el = document.getElementById(id);
-      const btn = el.previousElementSibling;
-      const indicator = btn.querySelector('span');
-      
-      if (el.style.display === "none") {
-        el.style.display = "flex";
-        indicator.innerHTML = "&minus;";
-      } else {
-        el.style.display = "none";
-        indicator.innerHTML = "&plus;";
-      }
+      const key = id.replace('content-', '');
+      const ind = document.getElementById('ind-' + key);
+      const isHidden = el.style.display === 'none';
+      el.style.display = isHidden ? 'flex' : 'none';
+      if (ind) ind.innerHTML = isHidden ? '&minus;' : '&plus;';
     }
 
-    async function filterByCollection(collectionName) {
-      document.querySelectorAll('.collection-btn-link').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      const targetedBtn = document.getElementById(`coll-${collectionName}`);
-      if (targetedBtn) targetedBtn.classList.add('active');
+    function setCollection(name) {
+      activeCollection = name;
+      document.querySelectorAll('.collection-btn-link').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById('coll-' + name);
+      if (btn) btn.classList.add('active');
+      renderGrid();
+    }
 
-      const allProducts = await apiGetAllProducts();
-      const grid = document.getElementById("catalog-products-grid");
+    function applyFilters() {
+      
+      document.querySelectorAll('.filter-check').forEach(cb => {
+        const filter = cb.dataset.filter;
+        const value = cb.dataset.value;
+        if (!activeFilters[filter]) activeFilters[filter] = [];
+        const idx = activeFilters[filter].indexOf(value);
+        if (cb.checked && idx === -1) activeFilters[filter].push(value);
+        else if (!cb.checked && idx > -1) activeFilters[filter].splice(idx, 1);
+      });
+      renderGrid();
+      updateActiveFilterBar();
+    }
+
+    function updateActiveFilterBar() {
+      const bar = document.getElementById('active-filters-bar');
+      let tags = '';
+      Object.entries(activeFilters).forEach(([key, vals]) => {
+        vals.forEach(v => {
+          tags += `<div class="active-filter-tag" onclick="removeFilter('${key}','${v}')">
+            ${key}: ${v} <span>&times;</span>
+          </div>`;
+        });
+      });
+      if (activeCollection !== 'all') {
+        tags += `<div class="active-filter-tag" onclick="setCollection('all')">
+          collection: ${activeCollection} <span>&times;</span>
+        </div>`;
+      }
+      bar.innerHTML = tags;
+    }
+
+    function removeFilter(key, val) {
+      const idx = activeFilters[key].indexOf(val);
+      if (idx > -1) activeFilters[key].splice(idx, 1);
+      // Uncheck the box
+      const cb = document.querySelector(`.filter-check[data-filter="${key}"][data-value="${val}"]`);
+      if (cb) cb.checked = false;
+      renderGrid();
+      updateActiveFilterBar();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('catalog-products-grid');
       if (!grid) return;
 
-      const filtered = collectionName === 'all' 
-        ? allProducts 
-        : allProducts.filter(p => p.collection === collectionName);
+      const searchVal = (document.getElementById('catalog-search')?.value || '').toLowerCase().trim();
 
-      grid.innerHTML = filtered.map(item => `
-        <div class="product-card" style="display: flex; flex-direction: column; background: #ffffff;">
-          <div style="width: 100%; height: 380px; background: #fafafa; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; color: var(--grey-mid); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; overflow: hidden; border: 1px solid #f5f5f5;">
-            <span style="opacity: 0.5;">Product Frame</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; font-family: var(--font);">
-            <div style="display: flex; flex-direction: column; gap: 0.2rem;">
-              <span style="font-size: 0.75rem; color: var(--grey-mid); text-transform: uppercase;">Cotton Layer</span>
-              <h3 style="font-size: 0.85rem; font-weight: 500; color: var(--black); margin: 0; text-transform: capitalize;">${item.name}</h3>
-            </div>
-            <span style="font-size: 0.85rem; font-weight: 500; color: var(--black);">${item.price}</span>
-          </div>
-          <button class="btn" onclick="addItemToCart(${item.id})" style="margin-top: 1rem; font-size: 0.7rem; padding: 0.6rem 1rem; letter-spacing: 0.1em; background: #000000; color: #ffffff; border: 1px solid #000000;">Add to Bag</button>
-        </div>
-      `).join("");
-    }
+      let filtered = allProducts.filter(p => {
+        if (activeCollection !== 'all' && p.collection !== activeCollection) return false;
+        if (searchVal && !p.name.toLowerCase().includes(searchVal) && !(p.description || '').toLowerCase().includes(searchVal)) return false;
+        return true;
+      });
 
-    function addItemToCart(id) {
-      if (typeof handleAddToCart === "function") {
-        handleAddToCart(id);
-      } else {
-        let cart = JSON.parse(localStorage.getItem("VIRELLI_CART")) || [];
-        cart.push(id);
-        localStorage.setItem("VIRELLI_CART", JSON.stringify(cart));
-        const count = document.getElementById("cart-count");
-        if(count) count.textContent = cart.length;
-        alert("Item committed to layout checkout sequence context bag!");
+      if (filtered.length === 0) {
+        grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--grey-mid);">No products match your filters.</p>`;
+        return;
       }
+
+      grid.innerHTML = filtered.map(function(item) {
+        const isFav = window.favoritesList && window.favoritesList.map(Number).indexOf(Number(item.id)) > -1;
+        return `
+        <div class="catalog-card">
+          <a href="product.html?id=${item.id}">
+            <div class="card-image"><span style="opacity:0.5;">Product Frame</span></div>
+          </a>
+          <div class="card-meta">
+            <div style="display:flex;flex-direction:column;gap:0.2rem;">
+              <span class="card-sub">Cotton Layer</span>
+              <h3 class="card-name">${item.name}</h3>
+            </div>
+            <span class="card-price">${item.price}</span>
+          </div>
+          <div class="product-card-controls">
+            <button class="btn" onclick="window.addToCart(${item.id})">Add to Bag</button>
+            <button class="btn-fav ${isFav ? 'active' : ''}" data-id="${item.id}"
+              onclick="window.toggleFavorite(${item.id})" aria-label="Favorite">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </button>
+          </div>
+        </div>`;
+      }).join('');
     }
   </script>
 </body>

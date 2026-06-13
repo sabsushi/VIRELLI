@@ -212,7 +212,10 @@
         <div class="summary-total-box">
           <div class="summary-row"><span>Subtotal</span><span id="summary-subtotal">€ 0.00</span></div>
           <div class="summary-row"><span>Shipping</span><span>Free</span></div>
-          <div class="summary-row total"><span>Total</span><span id="summary-total">€ 0.00</span></div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span id="summary-total"><span id="checkout-calculated-total">€ 0.00</span></span>
+          </div>
         </div>
       </div>
     </div>
@@ -271,8 +274,8 @@
   <script src="js/api.js"></script>
   <script src="js/components.js"></script>
   <script src="js/cart.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
+  <script>  
+  document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('footer-placeholder').outerHTML = getFooterHTML();
       renderCheckoutCart();
     });
@@ -306,7 +309,6 @@
       if (err) err.style.display = 'none';
     }
 
-    // Live validation feedback on blur
     ['first-name','last-name','address','city'].forEach(function(id) {
       document.getElementById(id).addEventListener('blur', function() {
         showFieldError(id, 'err-' + id, function(v) { return v.length < 1; });
@@ -322,7 +324,6 @@
       showFieldError('phone', 'err-phone', function(v) { return v.replace(/\D/g,'').length < 9; });
     });
 
-    // Step 1 submit
     document.getElementById('checkout-info-form').addEventListener('submit', (e) => {
       e.preventDefault();
       const errs = [
@@ -343,19 +344,16 @@
       goToStep(2);
     });
 
-    // Card number auto-format
     document.getElementById('card-number').addEventListener('input', function() {
       var v = this.value.replace(/\D/g,'').slice(0,16);
       this.value = v.replace(/(.{4})/g,'$1 ').trim();
     });
-    // Expiry auto-format
     document.getElementById('card-expiry').addEventListener('input', function() {
       var v = this.value.replace(/\D/g,'').slice(0,4);
       if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2);
       this.value = v;
     });
 
-    // Step 3 payment submit → validate then show invoice
     document.getElementById('checkout-payment-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const errs = [
@@ -365,46 +363,63 @@
         showFieldError('card-cvv',    'err-card-cvv',    function(v) { return !/^\d{3,4}$/.test(v); })
       ];
       if (errs.some(Boolean)) return;
-      await generateInvoice();
+
+      const cartData = JSON.parse(localStorage.getItem('VIRELLI_CART')) || [];
+      const payload = {
+        customer: orderInfo,
+        items: cartData
+      };
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/checkout/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('Backend error');
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          generateInvoiceFromServer(data.order_details);
+        }
+      } catch (error) {
+        alert("Erro ao conectar ao servidor backend.");
+        console.error(error);
+      }
     });
 
-    async function generateInvoice() {
-      const invoiceNum = 'VRL-' + Date.now().toString().slice(-6);
+    function generateInvoiceFromServer(orderDetails) {
       const date = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
-
-      // Build invoice items from cart
-      const cartData = JSON.parse(localStorage.getItem('VIRELLI_CART')) || [];
       const itemMap = {};
-      cartData.forEach(item => {
+      
+      orderDetails.items.forEach(item => {
         itemMap[item.id] ? itemMap[item.id].qty++ : (itemMap[item.id] = { ...item, qty: 1 });
       });
 
-      let total = 0;
       const itemsHTML = Object.values(itemMap).map(item => {
-        const price = parseFloat(item.price.replace(/[^0-9.]/g, ''));
-        total += price * item.qty;
+        const cleanPrice = typeof item.price === 'string' 
+          ? parseFloat(item.price.replace(/[^0-9.]/g, '')) 
+          : item.price;
         return `<tr>
           <td>${item.name}</td>
           <td>${item.qty}</td>
-          <td style="text-align:right;">€ ${(price * item.qty).toFixed(2)}</td>
+          <td style="text-align:right;">€ ${(cleanPrice * item.qty).toFixed(2)}</td>
         </tr>`;
       }).join('');
 
-      // Fill invoice
-      document.getElementById('invoice-number').textContent = invoiceNum;
+      document.getElementById('invoice-number').textContent = orderDetails.order_id;
       document.getElementById('invoice-date').textContent = date;
-      document.getElementById('invoice-customer').textContent = `${orderInfo.firstName} ${orderInfo.lastName}`;
-      document.getElementById('invoice-email-display').textContent = orderInfo.email || '';
-      document.getElementById('invoice-email-confirm').textContent = orderInfo.email || 'your email';
+      document.getElementById('invoice-customer').textContent = orderDetails.customer_name;
+      document.getElementById('invoice-email-display').textContent = orderDetails.customer_email;
+      document.getElementById('invoice-email-confirm').textContent = orderDetails.customer_email;
       document.getElementById('invoice-items').innerHTML = itemsHTML || '<tr><td colspan="3" style="color:var(--grey-mid);">No items</td></tr>';
-      document.getElementById('invoice-total').textContent = `€ ${total.toFixed(2)}`;
+      document.getElementById('invoice-total').textContent = `€ ${orderDetails.total_price.toFixed(2)}`;
 
-      // Show invoice, hide form
       document.getElementById('checkout-main').style.display = 'none';
       document.getElementById('confirmation-screen').style.display = 'block';
-
-      // Clear cart
-      localStorage.removeItem('VIRELLI_CART');
     }
   </script>
 </body>

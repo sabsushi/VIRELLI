@@ -1,4 +1,3 @@
-
 let cart = JSON.parse(localStorage.getItem('VIRELLI_CART')) || [];
 window.favoritesList = (JSON.parse(localStorage.getItem('VIRELLI_FAVS')) || []).map(Number);
 
@@ -53,19 +52,28 @@ function renderCheckoutCart() {
 
   const itemMap = {};
   cart.forEach(item => {
-    itemMap[item.id] ? itemMap[item.id].qty++ : (itemMap[item.id] = { ...item, qty: 1 });
+    if (item && item.id) {
+      itemMap[item.id] ? itemMap[item.id].qty++ : (itemMap[item.id] = { ...item, qty: 1 });
+    }
   });
 
   let subtotal = 0;
   container.innerHTML = Object.values(itemMap).map(item => {
-    const price = parseFloat(item.price.replace(/[^0-9.]/g, ''));
+    let price = 0;
+    if (typeof item.price === 'string') {
+      price = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
+    } else if (typeof item.price === 'number') {
+      price = item.price;
+    }
+    
     subtotal += price * item.qty;
+    
     return `
       <div class="checkout-item-row">
         <div class="checkout-item-left">
           <div class="image-placeholder" style="width:60px;height:60px;flex-shrink:0;"></div>
           <div class="checkout-item-meta">
-            <h4>${item.name}</h4>
+            <h4>${item.name || 'Product'}</h4>
             <p>Size: L</p>
             <div class="qty-stepper" style="margin-top:0.35rem;">
               <button type="button" onclick="changeQty(${item.id}, -1)">−</button>
@@ -90,9 +98,7 @@ function renderCheckoutCart() {
 
 window.toggleFavorite = function(id) {
   id = Number(id);
-  
   window.favoritesList = window.favoritesList.map(Number);
-
   const idx = window.favoritesList.indexOf(id);
   const isAdding = idx === -1;
 
@@ -103,11 +109,8 @@ window.toggleFavorite = function(id) {
   }
 
   localStorage.setItem('VIRELLI_FAVS', JSON.stringify(window.favoritesList));
-
-  
   updateFavUI();
 
-  
   document.querySelectorAll('.btn-fav[data-id="' + id + '"]').forEach(function(btn) {
     btn.classList.toggle('active', isAdding);
     if (isAdding) {
@@ -116,7 +119,6 @@ window.toggleFavorite = function(id) {
     }
   });
 
-  
   var detailBtn = document.getElementById('detail-fav-btn');
   if (detailBtn) {
     detailBtn.classList.toggle('active', isAdding);

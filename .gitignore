@@ -1,6 +1,5 @@
-# Cache do Python
+
 **/__pycache__/
 *.pyc
 
-# Base de dados local (SQLite)
 backend/virelli.db

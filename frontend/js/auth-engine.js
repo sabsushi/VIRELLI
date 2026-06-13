@@ -13,12 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---- Sign In ----
   if (signInForm) {
-    signInForm.addEventListener("submit", (e) => {
+    signInForm.addEventListener("submit", async (e) => { 
       e.preventDefault();
       const email = document.getElementById("signin-email").value.trim();
       const password = document.getElementById("signin-password").value;
 
-      // Master Admin Account Control Criteria
       if (email === "admin@virelli.com" && password === "admin123") {
         const adminSession = { name: "System Administrator", email: email, role: "admin" };
         localStorage.setItem("VIRELLI_SESSION", JSON.stringify(adminSession));
@@ -27,43 +26,86 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const registeredUsers = JSON.parse(localStorage.getItem("VIRELLI_USER_DB")) || [];
-      const matchedUser = registeredUsers.find(user => user.email === email && user.password === password);
+      try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ 
+            email: email, 
+            password: password 
+          })
+        });
 
-      if (matchedUser) {
-        const userSession = { name: matchedUser.name, email: matchedUser.email, role: "user", address: "Avenida da Liberdade, Lisbon" };
-        localStorage.setItem("VIRELLI_SESSION", JSON.stringify(userSession));
-        alert(`Welcome back, ${matchedUser.name}!`);
-        window.location.href = "user.html";
-      } else {
-        alert("Invalid credentials. Use admin@virelli.com / admin123, or create a customer account.");
+        const data = await response.json();
+
+        if (response.ok) {
+          const userSession = { 
+            email: email, 
+            role: "user", 
+            token: data.access_token, 
+          };
+          
+          localStorage.setItem("VIRELLI_SESSION", JSON.stringify(userSession));
+          alert("Welcome back!");
+          window.location.href = "user.html";
+        } else {
+          alert(data.detail || "Invalid credentials. Verify your email and password.");
+        }
+
+      } catch (error) {
+        console.error("Erro na ligação ao backend durante o login:", error);
+        alert("O servidor backend está offline. Não foi possível validar o login.");
       }
     });
   }
-
   if (signUpForm) {
-    signUpForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = document.getElementById("signup-name").value.trim();
-      const email = document.getElementById("signup-email").value.trim();
-      const password = document.getElementById("signup-password").value;
+  signUpForm.addEventListener("submit", async (e) => { 
+    e.preventDefault();
+    const name = document.getElementById("signup-name").value.trim();
+    const email = document.getElementById("signup-email").value.trim();
+    const password = document.getElementById("signup-password").value;
 
-      let registeredUsers = JSON.parse(localStorage.getItem("VIRELLI_USER_DB")) || [];
-      
-      if (registeredUsers.some(user => user.email === email) || email === "admin@virelli.com") {
-        alert("An account with this email address already exists.");
-        return;
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, { 
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ 
+          username: name, 
+          email: email, 
+          password: password 
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        let registeredUsers = JSON.parse(localStorage.getItem("VIRELLI_USER_DB")) || [];
+
+        registeredUsers.push({ name, email, password });
+        localStorage.setItem("VIRELLI_USER_DB", JSON.stringify(registeredUsers));
+
+        alert("Account created successfully in the database and saved locally!");
+        switchAuthTab("signin");
+      } else {
+        alert(data.detail || "Error creating account on the server.");
       }
 
-      registeredUsers.push({ name, email, password });
-      localStorage.setItem("VIRELLI_USER_DB", JSON.stringify(registeredUsers));
-      alert("Account created successfully!");
-      switchAuthTab("signin");
-    });
-  }
+    } catch (error) {
+      console.error("Error connecting to backend:", error);
+      alert("Backend server is offline. Account could not be saved to database.");
+    }
+  });
+}
 });
 
 function executeLogout() {
   localStorage.removeItem('VIRELLI_SESSION');
   window.location.href = 'index.html';
 }
+
+
+

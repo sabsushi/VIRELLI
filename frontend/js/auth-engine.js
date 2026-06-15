@@ -9,7 +9,7 @@ function switchAuthTab(target) {
 document.addEventListener("DOMContentLoaded", () => {
   const signInForm = document.getElementById("form-signin");
   const signUpForm = document.getElementById("form-signup");
-  const API_URL = "http://localhost:8000"; // Backend FastAPI address
+  const API_URL = "http://localhost:8000"; 
 
   // ---- Sign In ----
   if (signInForm) {
@@ -55,8 +55,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
       } catch (error) {
-        console.error("Erro na ligação ao backend durante o login:", error);
-        alert("O servidor backend está offline. Não foi possível validar o login.");
+        console.error("Error connecting to backend during login:", error);
+        alert("The backend server is offline. Unable to log in.");
       }
     });
   }

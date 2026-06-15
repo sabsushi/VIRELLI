@@ -43,68 +43,82 @@
 
   <script src="js/api.js"></script>
   <script>
-    (async function() {
+     (async function() {
       if (document.readyState === 'loading') {
         await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
       }
-
       const activeUser = JSON.parse(localStorage.getItem("VIRELLI_SESSION"));
       if (!activeUser || activeUser.role !== "admin") {
         alert("Access Denied: Administrative Clearance Required.");
         window.location.href = "auth.html";
         return;
       }
-      
+
       document.getElementById("admin-restricted-content").style.display = "block";
       renderAdminInventory();
+
 
       const addForm = document.getElementById("admin-add-product-form");
       if (addForm) {
         addForm.addEventListener("submit", async (e) => {
           e.preventDefault();
-          const name = document.getElementById("prod-name").value;
-          const price = document.getElementById("prod-price").value;
-          const description = document.getElementById("prod-desc").value;
+          const name = document.getElementById("prod-name").value.trim();
+          let rawPrice = document.getElementById("prod-price").value;
+          const description = document.getElementById("prod-desc").value.trim();
 
-          let dynamicCatalog = JSON.parse(localStorage.getItem("VIRELLI_EXTENDED_INVENTORY")) || [];
-          const nextId = 4 + dynamicCatalog.length;
+          const cleanPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, ''));
+          if (isNaN(cleanPrice)) {
+            alert("Please enter a valid numeric price.");
+            return;
+          }
 
-          const newProduct = { id: nextId, name, price, description };
-          dynamicCatalog.push(newProduct);
-          localStorage.setItem("VIRELLI_EXTENDED_INVENTORY", JSON.stringify(dynamicCatalog));
+          const productPayload = {
+            name: name,
+            price: cleanPrice,
+            description: description,
+            image_url: "images/products/default.png",
+            category: "Streetwear",
+            sizes: "S,M,L,XL"
+          };
 
-          addForm.reset();
-          renderAdminInventory();
-          alert("New clothing item published successfully!");
+          const result = await apiCreateProduct(productPayload);
+
+          if (result.success) {
+            alert("Product published successfully!");
+            addForm.reset();
+            renderAdminInventory(); 
+          } else {
+            alert(result.data.detail || "Error publishing product.");
+          }
         });
       }
     })();
+
 
     async function renderAdminInventory() {
       const displayContainer = document.getElementById("admin-inventory-list");
       if (!displayContainer) return;
 
-      const items = await apiGetAllProducts();
-      displayContainer.innerHTML = items.map(item => `
-        <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid var(--grey-light); padding:1rem; background:#fafafa;">
-          <div>
-            <h4 style="font-size:0.85rem; text-transform:uppercase;">${item.name}</h4>
-            <p style="font-size:0.8rem; color:var(--grey-mid);">${item.price}</p>
+      try {
+        const items = await apiGetAllProducts(); 
+        
+        displayContainer.innerHTML = items.map(item => `
+          <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid var(--grey-light); padding:1rem; background:#fafafa;">
+            <div>
+              <h4 style="font-size:0.85rem; text-transform:uppercase; margin:0;">${item.name}</h4>
+              <p style="font-size:0.8rem; color:var(--grey-mid); margin:0.2rem 0 0 0;">€ ${Number(item.price).toFixed(2)}</p>
+            </div>
+            <button class="btn" onclick="deleteProduct(${item.id})" style="padding:0.4rem 0.8rem; font-size:0.65rem; background:#cc3333; border-color:#cc3333; color: white;">Remove</button>
           </div>
-          <button class="btn" onclick="deleteProduct(${item.id})" style="padding:0.4rem 0.8rem; font-size:0.65rem; background:#cc3333; border-color:#cc3333; color: white;">Remove</button>
-        </div>
-      `).join("");
+        `).join("");
+      } catch (error) {
+        displayContainer.innerHTML = `<p style="color:red; font-size:0.8rem;">Failed to load live registry.</p>`;
+      }
     }
 
     window.deleteProduct = function(id) {
-      if(id <= 3) {
-        alert("Protected Base Record: Cannot delete hardcoded structural seed items (IDs 1-3).");
-        return;
-      }
-      let dynamicCatalog = JSON.parse(localStorage.getItem("VIRELLI_EXTENDED_INVENTORY")) || [];
-      dynamicCatalog = dynamicCatalog.filter(p => p.id !== id);
-      localStorage.setItem("VIRELLI_EXTENDED_INVENTORY", JSON.stringify(dynamicCatalog));
-      renderAdminInventory();
+      alert("Delete functionality will be wired to backend database room in the next sprint!");
+      console.log(`Requesting delete for product ID: ${id}`);
     }
 
     function executeLogout() {

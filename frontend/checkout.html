@@ -2,112 +2,424 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="description" content="VIRELLI — Secure checkout.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="styles/components.css">
   <title>Checkout — VIRELLI</title>
+  <style>
+    .checkout-header-nav {
+      max-width: 650px;
+      margin: 2.5rem auto 2rem auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 var(--spacing-lg);
+      font-family: var(--font);
+    }
+    .step-btn {
+      background: transparent; border: none; font-family: var(--font);
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--grey-mid); cursor: pointer; padding-bottom: 6px;
+    }
+    .step-btn.active { color: var(--black); font-weight: 500; border-bottom: 1.5px solid var(--black); }
+    .checkout-grid {
+      max-width: 1100px;
+      margin: 0 auto 5rem auto;
+      padding: 0 var(--spacing-lg);
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 4rem;
+    }
+    .checkout-form-side { display: flex; flex-direction: column; gap: 2rem; }
+    .section-title {
+      font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--black); font-weight: 500; margin: 0;
+      border-bottom: 1px solid var(--grey-light); padding-bottom: 1rem;
+    }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .checkout-input {
+      width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light);
+      font-size: 0.85rem; outline: none; background: #fafafa;
+      font-family: var(--font); box-sizing: border-box; transition: border-color 0.2s;
+    }
+    .checkout-input:focus { border-color: var(--grey-mid); background: #fff; }
+    .order-summary {
+      background: #fafafa; padding: 2rem; border: 1px solid var(--grey-light);
+      display: flex; flex-direction: column; height: fit-content; position: sticky; top: 80px;
+    }
+    .summary-title {
+      font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;
+      border-bottom: 1px solid var(--grey-light); padding-bottom: 1rem;
+      margin-bottom: 1.5rem; color: var(--black); font-weight: 600; margin-top: 0;
+    }
+    .summary-total-box { margin-top: 2rem; border-top: 1px solid var(--grey-light); padding-top: 1.5rem; }
+    .summary-row {
+      display: flex; justify-content: space-between; font-size: 0.85rem;
+      margin-bottom: 0.6rem; color: var(--grey-dark);
+    }
+    .summary-row.total { font-weight: 600; font-size: 0.95rem; color: var(--black); margin-top: 0.75rem; }
+    .checkout-item-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 1.25rem; border-bottom: 1px solid #f5f5f5; margin-bottom: 0.25rem;
+    }
+    .checkout-item-left { display: flex; gap: 0.75rem; align-items: center; }
+    .checkout-item-meta h4 { font-size: 0.82rem; font-weight: 500; margin: 0 0 0.2rem 0; }
+    .checkout-item-meta p { font-size: 0.75rem; color: var(--grey-mid); margin: 0; }
+    .checkout-item-price { font-size: 0.85rem; font-weight: 500; }
+    /* Confirmation / Invoice overlay */
+    #confirmation-screen {
+      display: none;
+      max-width: 780px;
+      margin: 3rem auto 5rem auto;
+      padding: 0 var(--spacing-lg);
+    }
+    @media (max-width: 860px) {
+      .checkout-grid { grid-template-columns: 1fr; }
+    }
+    .field-error {
+      font-size: 0.75rem; color: #c0392b; margin-top: -0.5rem;
+      display: none; letter-spacing: 0.02em;
+    }
+    .checkout-input.invalid { border-color: #c0392b; background: #fff8f8; }
+    .checkout-input.valid   { border-color: #27ae60; }
+  </style>
 </head>
 <body>
 
-  <nav class="main-nav">
-    <div class="nav-left">
-      <a href="index.html" class="logo">VIRELLI Checkout</a>
-    </div>
-    <div class="nav-right">
-      <a href="catalog.html" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--grey-dark); text-decoration: none;">Continue Shopping</a>
-    </div>
+  <nav class="main-nav" style="justify-content:space-between;">
+    <a href="index.html" class="logo" style="font-family:var(--font-serif);font-size:1.6rem;letter-spacing:0.08em;">VIRELLI</a>
+    <a href="catalog.html" style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--grey-dark);">← Continue Shopping</a>
   </nav>
 
-  <nav class="checkout-steps-header" style="max-width: 650px; margin: 3rem auto 2.5rem auto; display: flex; justify-content: space-between; align-items: center; padding: 0 var(--spacing-lg); font-family: var(--font);">
-    <button class="step-btn active" style="background: transparent; border: none; font-family: var(--font); font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--black); cursor: pointer; border-bottom: 1.5px solid var(--black); padding-bottom: 6px;">1. Information</button>
-    <span style="color: var(--grey-light); font-size: 0.9rem; user-select: none;">&longrightarrow;</span>
-    <button class="step-btn" style="background: transparent; border: none; font-family: var(--font); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--grey-mid); cursor: pointer; padding-bottom: 6px; font-weight: 400;">2. Shipping</button>
-    <span style="color: var(--grey-light); font-size: 0.9rem; user-select: none;">&longrightarrow;</span>
-    <button class="step-btn" style="background: transparent; border: none; font-family: var(--font); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--grey-mid); cursor: pointer; padding-bottom: 6px; font-weight: 400;">3. Payment</button>
+  
+  <nav class="checkout-header-nav">
+    <button class="step-btn active" id="step-1-btn">1. Information</button>
+    <span style="color:var(--grey-light);">&#8594;</span>
+    <button class="step-btn" id="step-2-btn">2. Shipping</button>
+    <span style="color:var(--grey-light);">&#8594;</span>
+    <button class="step-btn" id="step-3-btn">3. Payment</button>
   </nav>
 
-  <main class="checkout-grid-container" style="max-width: 1200px; margin: 0 auto 5rem auto; padding: 0 var(--spacing-lg); display: grid; grid-template-columns: 1.2fr 1fr; gap: 4rem; font-family: var(--font);">
-    
-    <div class="checkout-form-side" style="display: flex; flex-direction: column; gap: 2rem;">
-      <div style="border-bottom: 1px solid var(--grey-light); padding-bottom: 1rem;">
-        <h2 style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--black); font-weight: 500; margin: 0;">Shipping Address</h2>
-      </div>
+  
+  <main id="checkout-main">
+    <div class="checkout-grid">
+
       
-      <form id="checkout-shipping-form" style="display: flex; flex-direction: column; gap: 1.25rem;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-          <input type="text" placeholder="First Name" required style="width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light); font-size: 0.85rem; outline: none; background: #fafafa;">
-          <input type="text" placeholder="Last Name" required style="width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light); font-size: 0.85rem; outline: none; background: #fafafa;">
+      <div class="checkout-form-side">
+        
+        <div id="step-1">
+          <h2 class="section-title">Shipping Address</h2>
+          <form id="checkout-info-form" style="display:flex;flex-direction:column;gap:1.25rem;" novalidate>
+            <div class="form-grid-2">
+              <div style="display:flex;flex-direction:column;gap:0.35rem;">
+                <label for="first-name" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">First Name</label>
+                <input class="checkout-input" type="text" id="first-name" placeholder="e.g. João" required>
+                <span class="field-error" id="err-first-name">Please enter your first name.</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0.35rem;">
+                <label for="last-name" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Last Name</label>
+                <input class="checkout-input" type="text" id="last-name" placeholder="e.g. Silva" required>
+                <span class="field-error" id="err-last-name">Please enter your last name.</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.35rem;">
+              <label for="order-email" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Email Address</label>
+              <input class="checkout-input" type="email" id="order-email" placeholder="e.g. joao@email.com" required>
+              <span class="field-error" id="err-email">Please enter a valid email address.</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.35rem;">
+              <label for="address" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Street Address</label>
+              <input class="checkout-input" type="text" id="address" placeholder="e.g. Rua das Flores, 42" required>
+              <span class="field-error" id="err-address">Please enter your street address.</span>
+            </div>
+            <div class="form-grid-2">
+              <div style="display:flex;flex-direction:column;gap:0.35rem;">
+                <label for="postal" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Postal Code</label>
+                <input class="checkout-input" type="text" id="postal" placeholder="e.g. 8000-001" required>
+                <span class="field-error" id="err-postal">Please enter a valid postal code.</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0.35rem;">
+                <label for="city" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">City</label>
+                <input class="checkout-input" type="text" id="city" placeholder="e.g. Faro" required>
+                <span class="field-error" id="err-city">Please enter your city.</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.35rem;">
+              <label for="phone" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Phone Number</label>
+              <input class="checkout-input" type="tel" id="phone" placeholder="e.g. +351 912 345 678" required>
+              <span class="field-error" id="err-phone">Please enter a valid phone number (at least 9 digits).</span>
+            </div>
+            <button type="submit" class="btn" style="width:100%;padding:1.1rem;">Continue to Shipping</button>
+          </form>
         </div>
-        <input type="text" placeholder="Address Details" required style="width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light); font-size: 0.85rem; outline: none; background: #fafafa;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-          <input type="text" placeholder="Postal Code" required style="width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light); font-size: 0.85rem; outline: none; background: #fafafa;">
-          <input type="text" placeholder="City" required style="width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light); font-size: 0.85rem; outline: none; background: #fafafa;">
-        </div>
-        <input type="tel" placeholder="Contact Phone Number" required style="width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light); font-size: 0.85rem; outline: none; background: #fafafa;">
-      </form>
-    </div>
 
-    <div class="checkout-summary-side" style="background: #fafafa; padding: 2rem; border: 1px solid var(--grey-light); display: flex; flex-direction: column; justify-content: space-between; height: fit-content; min-height: 400px;">
-      <div>
-        <h3 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--grey-light); padding-bottom: 1rem; margin-bottom: 1.5rem; color: var(--black); font-weight: 600; margin-top: 0;">Your Order</h3>
-        <div id="checkout-basket-items-list" style="display: flex; flex-direction: column; gap: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
-            <span style="color: var(--black); font-weight: 500;">Basic Slim Fit T-Shirt (x1)</span>
-            <span style="color: var(--grey-dark);">€ 199.00</span>
+        
+        <div id="step-2" style="display:none;">
+          <h2 class="section-title">Shipping Method</h2>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1rem;">
+            <label style="display:flex;align-items:center;gap:1rem;padding:1rem;border:1px solid var(--grey-light);cursor:pointer;">
+              <input type="radio" name="shipping" value="standard" checked> 
+              <span style="font-size:0.85rem;">Standard Shipping (5–7 days) — Free</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:1rem;padding:1rem;border:1px solid var(--grey-light);cursor:pointer;">
+              <input type="radio" name="shipping" value="express"> 
+              <span style="font-size:0.85rem;">Express Shipping (2–3 days) — €12.00</span>
+            </label>
+          </div>
+          <button class="btn" onclick="goToStep(3)" style="width:100%;padding:1.1rem;margin-top:1.5rem;">Continue to Payment</button>
+          <button onclick="goToStep(1)" style="font-size:0.78rem;color:var(--grey-mid);margin-top:0.75rem;text-decoration:underline;background:none;border:none;cursor:pointer;">← Back</button>
+        </div>
+
+        
+        <div id="step-3" style="display:none;">
+          <h2 class="section-title">Payment Details</h2>
+          <form id="checkout-payment-form" style="display:flex;flex-direction:column;gap:1.25rem;margin-top:1rem;" novalidate>
+            <div style="display:flex;flex-direction:column;gap:0.35rem;">
+              <label for="card-name" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Cardholder Name</label>
+              <input class="checkout-input" type="text" id="card-name" placeholder="Name as on card" required>
+              <span class="field-error" id="err-card-name">Please enter the cardholder name.</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.35rem;">
+              <label for="card-number" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Card Number</label>
+              <input class="checkout-input" type="text" id="card-number" placeholder="•••• •••• •••• ••••" maxlength="19" required>
+              <span class="field-error" id="err-card-number">Please enter a valid 16-digit card number.</span>
+            </div>
+            <div class="form-grid-2">
+              <div style="display:flex;flex-direction:column;gap:0.35rem;">
+                <label for="card-expiry" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Expiry</label>
+                <input class="checkout-input" type="text" id="card-expiry" placeholder="MM / YY" maxlength="7" required>
+                <span class="field-error" id="err-card-expiry">Please enter a valid expiry date (MM / YY).</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:0.35rem;">
+                <label for="card-cvv" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">CVV</label>
+                <input class="checkout-input" type="text" id="card-cvv" placeholder="•••" maxlength="4" required>
+                <span class="field-error" id="err-card-cvv">Please enter a valid 3 or 4-digit CVV.</span>
+              </div>
+            </div>
+            <button type="submit" class="btn" style="width:100%;padding:1.2rem;font-size:0.85rem;letter-spacing:0.12em;">
+              Complete Secure Payment
+            </button>
+            <button type="button" onclick="goToStep(2)" style="font-size:0.78rem;color:var(--grey-mid);text-decoration:underline;background:none;border:none;cursor:pointer;">← Back</button>
+          </form>
+        </div>
+      </div>
+
+      
+      <div class="order-summary">
+        <h3 class="summary-title">Your Order</h3>
+        <div id="checkout-summary-items"></div>
+        <div class="summary-total-box">
+          <div class="summary-row"><span>Subtotal</span><span id="summary-subtotal">€ 0.00</span></div>
+          <div class="summary-row"><span>Shipping</span><span>Free</span></div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span id="summary-total"><span id="checkout-calculated-total">€ 0.00</span></span>
           </div>
         </div>
       </div>
-
-      <div class="summary-total-cta-box" style="margin-top: 4rem; border-top: 1px solid var(--grey-light); padding-top: 1.75rem;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 2.25rem; font-family: var(--font); font-size: 0.95rem; font-weight: 500; color: var(--black); letter-spacing: 0.02em;">
-          <span>Total Amount</span>
-          <span id="checkout-calculated-total" style="font-weight: 600;">€ 199.00</span>
-        </div>
-        
-        <button type="button" onclick="processMockOrder(event)" class="btn" style="width: 100%; padding: 1.2rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 500; border: 1px solid var(--black);">
-          Complete Secure Payment
-        </button>
-      </div>
     </div>
-
   </main>
 
-  <footer class="main-footer" style="border-top: 1px solid var(--grey-light); margin-top: 6rem; padding: 4rem 0 2rem 0; font-family: var(--font); background: #ffffff;">
-    <div class="footer-container" style="max-width: 1200px; margin: 0 auto; padding: 0 var(--spacing-lg); display: grid; grid-template-columns: 1.5fr 1fr; gap: 4rem;">
-      <div class="footer-brand" style="display: flex; flex-direction: column; gap: 1rem;">
-        <span class="footer-logo" style="font-size: 1.1rem; font-weight: 600; letter-spacing: 0.2em; color: var(--black);">VIRELLI</span>
-        <p style="font-size: 0.85rem; color: var(--grey-dark); line-height: 1.6; max-width: 400px; margin: 0;">
-          Minimal urban aesthetics engineered for focus. This project is an academic frontend interface developed natively for evaluation.
+
+  <div id="confirmation-screen">
+    <div class="invoice-container">
+      <div class="invoice-header">
+        <div>
+          <div class="invoice-logo">VIRELLI</div>
+          <p style="font-size:0.8rem;color:var(--grey-mid);margin-top:0.5rem;">Order Confirmation</p>
+        </div>
+        <div class="invoice-meta">
+          <div><strong>Invoice #</strong><span id="invoice-number"></span></div>
+          <div><strong>Date:</strong> <span id="invoice-date"></span></div>
+          <div><strong>To:</strong> <span id="invoice-customer"></span></div>
+          <div><span id="invoice-email-display"></span></div>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th style="text-align:right;">Price</th>
+          </tr>
+        </thead>
+        <tbody id="invoice-items"></tbody>
+        <tfoot>
+          <tr class="invoice-total-row">
+            <td colspan="2">Total</td>
+            <td style="text-align:right;" id="invoice-total"></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div style="margin-top:2rem;padding:1.25rem;background:#fafafa;border:1px solid var(--grey-light);">
+        <p style="font-size:0.82rem;color:var(--grey-dark);line-height:1.6;margin:0;">
+          ✓ &nbsp;A copy of this invoice has been sent to <strong id="invoice-email-confirm"></strong>.<br>
+          Thank you for your purchase. Your order will be dispatched within 1–2 business days.
         </p>
       </div>
-      <div class="footer-links-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-        <div class="footer-column" style="display: flex; flex-direction: column; gap: 0.8rem;">
-          <h4 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--black); font-weight: 600; margin-bottom: 0.5rem;">Collection</h4>
-          <a href="catalog.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none;">New Arrivals</a>
-          <a href="catalog.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none;">All Clothing</a>
-        </div>
-        <div class="footer-column" style="display: flex; flex-direction: column; gap: 0.8rem;">
-          <h4 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--black); font-weight: 600; margin-bottom: 0.5rem;">About</h4>
-          <a href="about.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none; font-weight: 500;">Our Studio</a>
-          <a href="about.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none; font-weight: 500;">Contact Us</a>
-        </div>
+
+      <div style="margin-top:1.5rem;display:flex;gap:1rem;">
+        <button onclick="window.print()" class="btn" style="flex:1;">Download Invoice</button>
+        <a href="index.html" class="btn" style="flex:1;text-align:center;background:#fff;color:var(--black);border:1px solid var(--grey-light);">Continue Shopping</a>
       </div>
     </div>
-    <div class="footer-bottom" style="max-width: 1200px; margin: 3rem auto 0 auto; padding: 1.5rem var(--spacing-lg) 0 var(--spacing-lg); border-top: 1px solid var(--grey-light); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--grey-mid);">
-      <p>&copy; 2026 VIRELLI Studio. All Rights Reserved.</p>
-      <p style="text-transform: uppercase; letter-spacing: 0.05em;">
-        Designed by <strong>Sabrina & Tiago</strong> &mdash; <strong>ETIC_Algarve Web Programming</strong>
-      </p>
-    </div>
-  </footer>
+  </div>
+
+
+  <div id="footer-placeholder"></div>
 
   <script src="js/api.js"></script>
-  <script>
-    function processMockOrder(e) {
+  <script src="js/components.js"></script>
+  <script src="js/cart.js"></script>
+  <script>  
+  document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('footer-placeholder').outerHTML = getFooterHTML();
+      renderCheckoutCart();
+    });
+
+    let currentStep = 1;
+    let orderInfo = {};
+
+    function goToStep(step) {
+      document.getElementById(`step-${currentStep}`).style.display = 'none';
+      document.getElementById(`step-${step}`).style.display = 'block';
+      document.querySelectorAll('.step-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i + 1 === step);
+      });
+      currentStep = step;
+    }
+
+    function showFieldError(inputId, errorId, condition) {
+      const input = document.getElementById(inputId);
+      const err   = document.getElementById(errorId);
+      const fail  = condition(input.value.trim());
+      input.classList.toggle('invalid', fail);
+      input.classList.toggle('valid', !fail);
+      if (err) err.style.display = fail ? 'block' : 'none';
+      return fail;
+    }
+
+    function clearFieldState(inputId, errorId) {
+      const input = document.getElementById(inputId);
+      const err   = document.getElementById(errorId);
+      input.classList.remove('invalid', 'valid');
+      if (err) err.style.display = 'none';
+    }
+
+    ['first-name','last-name','address','city'].forEach(function(id) {
+      document.getElementById(id).addEventListener('blur', function() {
+        showFieldError(id, 'err-' + id, function(v) { return v.length < 1; });
+      });
+    });
+    document.getElementById('order-email').addEventListener('blur', function() {
+      showFieldError('order-email', 'err-email', function(v) { return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); });
+    });
+    document.getElementById('postal').addEventListener('blur', function() {
+      showFieldError('postal', 'err-postal', function(v) { return v.length < 3; });
+    });
+    document.getElementById('phone').addEventListener('blur', function() {
+      showFieldError('phone', 'err-phone', function(v) { return v.replace(/\D/g,'').length < 9; });
+    });
+
+    document.getElementById('checkout-info-form').addEventListener('submit', (e) => {
       e.preventDefault();
-      alert("Order processed securely!");
-      localStorage.removeItem("VIRELLI_CART");
-      window.location.href = "index.html";
+      const errs = [
+        showFieldError('first-name',  'err-first-name', function(v) { return v.length < 1; }),
+        showFieldError('last-name',   'err-last-name',  function(v) { return v.length < 1; }),
+        showFieldError('order-email', 'err-email',      function(v) { return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }),
+        showFieldError('address',     'err-address',    function(v) { return v.length < 3; }),
+        showFieldError('postal',      'err-postal',     function(v) { return v.length < 3; }),
+        showFieldError('city',        'err-city',       function(v) { return v.length < 1; }),
+        showFieldError('phone',       'err-phone',      function(v) { return v.replace(/\D/g,'').length < 9; })
+      ];
+      if (errs.some(Boolean)) return;
+      orderInfo.firstName = document.getElementById('first-name').value;
+      orderInfo.lastName  = document.getElementById('last-name').value;
+      orderInfo.email     = document.getElementById('order-email').value;
+      orderInfo.address   = document.getElementById('address').value;
+      orderInfo.city      = document.getElementById('city').value;
+      goToStep(2);
+    });
+
+    document.getElementById('card-number').addEventListener('input', function() {
+      var v = this.value.replace(/\D/g,'').slice(0,16);
+      this.value = v.replace(/(.{4})/g,'$1 ').trim();
+    });
+    document.getElementById('card-expiry').addEventListener('input', function() {
+      var v = this.value.replace(/\D/g,'').slice(0,4);
+      if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2);
+      this.value = v;
+    });
+
+    document.getElementById('checkout-payment-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errs = [
+        showFieldError('card-name',   'err-card-name',   function(v) { return v.length < 2; }),
+        showFieldError('card-number', 'err-card-number', function(v) { return v.replace(/\s/g,'').length !== 16; }),
+        showFieldError('card-expiry', 'err-card-expiry', function(v) { return !/^\d{2}\s\/\s\d{2}$/.test(v); }),
+        showFieldError('card-cvv',    'err-card-cvv',    function(v) { return !/^\d{3,4}$/.test(v); })
+      ];
+      if (errs.some(Boolean)) return;
+
+      const cartData = JSON.parse(localStorage.getItem('VIRELLI_CART')) || [];
+      const payload = {
+        customer: orderInfo,
+        items: cartData
+      };
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/checkout/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error('Backend error');
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          generateInvoiceFromServer(data.order_details);
+        }
+      } catch (error) {
+        alert("Erro ao conectar ao servidor backend.");
+        console.error(error);
+      }
+    });
+
+    function generateInvoiceFromServer(orderDetails) {
+      const date = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
+      const itemMap = {};
+      
+      orderDetails.items.forEach(item => {
+        itemMap[item.id] ? itemMap[item.id].qty++ : (itemMap[item.id] = { ...item, qty: 1 });
+      });
+
+      const itemsHTML = Object.values(itemMap).map(item => {
+        const cleanPrice = typeof item.price === 'string' 
+          ? parseFloat(item.price.replace(/[^0-9.]/g, '')) 
+          : item.price;
+        return `<tr>
+          <td>${item.name}</td>
+          <td>${item.qty}</td>
+          <td style="text-align:right;">€ ${(cleanPrice * item.qty).toFixed(2)}</td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('invoice-number').textContent = orderDetails.order_id;
+      document.getElementById('invoice-date').textContent = date;
+      document.getElementById('invoice-customer').textContent = orderDetails.customer_name;
+      document.getElementById('invoice-email-display').textContent = orderDetails.customer_email;
+      document.getElementById('invoice-email-confirm').textContent = orderDetails.customer_email;
+      document.getElementById('invoice-items').innerHTML = itemsHTML || '<tr><td colspan="3" style="color:var(--grey-mid);">No items</td></tr>';
+      document.getElementById('invoice-total').textContent = `€ ${orderDetails.total_price.toFixed(2)}`;
+
+      document.getElementById('checkout-main').style.display = 'none';
+      document.getElementById('confirmation-screen').style.display = 'block';
     }
   </script>
 </body>

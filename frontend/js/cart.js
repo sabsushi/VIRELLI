@@ -1,28 +1,81 @@
 let cart = JSON.parse(localStorage.getItem('VIRELLI_CART')) || [];
 window.favoritesList = (JSON.parse(localStorage.getItem('VIRELLI_FAVS')) || []).map(Number);
 
-window.addToCart = function(productId) {
+// --- Bug #5: robust price parsing/formatting -----------------------------
+// Handles numbers, "€ 29.99", European "1.299,00" and US "1,299.00".
+window.parsePrice = function parsePrice(value) {
+  if (typeof value === 'number') return isFinite(value) ? value : 0;
+  if (typeof value !== 'string') return 0;
+  let s = value.replace(/[^\d.,]/g, '');
+  if (!s) return 0;
+  const lastComma = s.lastIndexOf(',');
+  const lastDot = s.lastIndexOf('.');
+  if (lastComma > lastDot) {
+    // comma is the decimal separator, dots are thousands separators
+    s = s.split('.').join('').replace(',', '.');
+  } else if (lastDot > lastComma) {
+    // dot is the decimal separator, commas are thousands separators
+    s = s.split(',').join('');
+  } else {
+    // no separators
+    s = s.replace(/,/g, '');
+  }
+  const n = parseFloat(s);
+  return isFinite(n) ? n : 0;
+};
+
+window.formatPrice = function formatPrice(value) {
+  return '€ ' + window.parsePrice(value).toFixed(2);
+};
+
+// --- Bug #8: derive a real size instead of hardcoding "L" -----------------
+function defaultSizeFor(product) {
+  if (product && typeof product.sizes === 'string' && product.sizes.trim()) {
+    return product.sizes.split(',')[0].trim();
+  }
+  if (product && Array.isArray(product.sizes) && product.sizes.length) {
+    return String(product.sizes[0]).trim();
+  }
+  return 'One Size';
+}
+
+// --- Bugs #1 & #2: clear cart + favourites on logout ----------------------
+// Wipes both storage and in-memory state, then refreshes any visible badges.
+window.clearShoppingState = function clearShoppingState() {
+  cart = [];
+  window.favoritesList = [];
+  localStorage.removeItem('VIRELLI_CART');
+  localStorage.removeItem('VIRELLI_FAVS');
+  if (typeof updateCartUI === 'function') updateCartUI();
+  if (typeof updateFavUI === 'function') updateFavUI();
+};
+
+window.addToCart = function(productId, size) {
   apiGetProductById(productId).then(productData => {
     if (!productData) return;
-    cart.push(productData);
+    const chosenSize = size || defaultSizeFor(productData);
+    cart.push({ ...productData, size: chosenSize });
     syncCartState();
     showToast(`${productData.name} added to bag`, 'cart');
   });
 };
 
-window.changeQty = function(id, delta) {
+window.changeQty = function(id, delta, size) {
   if (delta === 1) {
     apiGetProductById(id).then(productData => {
-      if (productData) { cart.push(productData); syncCartState(); }
+      if (productData) {
+        cart.push({ ...productData, size: size || defaultSizeFor(productData) });
+        syncCartState();
+      }
     });
   } else if (delta === -1) {
-    const idx = cart.findIndex(item => item.id === id);
+    const idx = cart.findIndex(item => item.id === id && (size === undefined || item.size === size));
     if (idx > -1) { cart.splice(idx, 1); syncCartState(); }
   }
 };
 
-window.removeFromCart = function(id) {
-  cart = cart.filter(item => item.id !== id);
+window.removeFromCart = function(id, size) {
+  cart = cart.filter(item => !(item.id === id && (size === undefined || item.size === size)));
   syncCartState();
 };
 
@@ -53,47 +106,45 @@ function renderCheckoutCart() {
   const itemMap = {};
   cart.forEach(item => {
     if (item && item.id) {
-      itemMap[item.id] ? itemMap[item.id].qty++ : (itemMap[item.id] = { ...item, qty: 1 });
+      const size = item.size || defaultSizeFor(item);
+      const key = item.id + '__' + size;
+      itemMap[key] ? itemMap[key].qty++ : (itemMap[key] = { ...item, size: size, qty: 1 });
     }
   });
 
   let subtotal = 0;
   container.innerHTML = Object.values(itemMap).map(item => {
-    let price = 0;
-    if (typeof item.price === 'string') {
-      price = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
-    } else if (typeof item.price === 'number') {
-      price = item.price;
-    }
-    
+    const price = window.parsePrice(item.price);
+
     subtotal += price * item.qty;
-    
+
     return `
       <div class="checkout-item-row">
         <div class="checkout-item-left">
           <div class="image-placeholder" style="width:60px;height:60px;flex-shrink:0;"></div>
           <div class="checkout-item-meta">
             <h4>${item.name || 'Product'}</h4>
-            <p>Size: L</p>
+            <p>Size: ${item.size}</p>
             <div class="qty-stepper" style="margin-top:0.35rem;">
-              <button type="button" onclick="changeQty(${item.id}, -1)">−</button>
+              <button type="button" onclick="changeQty(${item.id}, -1, '${item.size}')">−</button>
               <span>${item.qty}</span>
-              <button type="button" onclick="changeQty(${item.id}, 1)">+</button>
+              <button type="button" onclick="changeQty(${item.id}, 1, '${item.size}')">+</button>
             </div>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;">
           <span class="checkout-item-price">€ ${(price * item.qty).toFixed(2)}</span>
-          <button onclick="removeFromCart(${item.id})" style="font-size:0.7rem;color:var(--grey-mid);text-transform:uppercase;letter-spacing:0.05em;">Remove</button>
+          <button onclick="removeFromCart(${item.id}, '${item.size}')" style="font-size:0.7rem;color:var(--grey-mid);text-transform:uppercase;letter-spacing:0.05em;">Remove</button>
         </div>
       </div>`;
   }).join('');
 
   if (subtotalEl) subtotalEl.textContent = `€ ${subtotal.toFixed(2)}`;
-  if (totalEl) totalEl.textContent = `€ ${subtotal.toFixed(2)}`;
+  const total = subtotal + (window.shippingCost || 0);
+  if (totalEl) totalEl.textContent = `€ ${total.toFixed(2)}`;
 
   const checkoutTotal = document.getElementById('checkout-calculated-total');
-  if (checkoutTotal) checkoutTotal.textContent = `€ ${subtotal.toFixed(2)}`;
+  if (checkoutTotal) checkoutTotal.textContent = `€ ${total.toFixed(2)}`;
 }
 
 window.toggleFavorite = function(id) {
@@ -140,10 +191,13 @@ function updateFavUI() {
 async function renderFavoritesDrawer() {
   const container = document.getElementById('fav-modal-items');
   if (!container) return;
+  if (typeof apiGetProductById !== 'function') return;
   if (window.favoritesList.length === 0) {
     container.innerHTML = `<p style="font-size:0.85rem;color:var(--grey-mid);padding:1rem 0;">No items favorited yet.</p>`;
     return;
   }
+  const esc = (typeof window.escapeHTML === 'function') ? window.escapeHTML : function(v){ return v; };
+  const fmt = (typeof window.formatPrice === 'function') ? window.formatPrice : function(v){ return v; };
   let html = '';
   for (let id of window.favoritesList) {
     const item = await apiGetProductById(id);
@@ -152,11 +206,11 @@ async function renderFavoritesDrawer() {
         <div class="fav-item-row">
           <div class="image-placeholder" style="width:60px;height:60px;flex-shrink:0;"></div>
           <div style="flex-grow:1;">
-            <h4 style="font-size:0.85rem;text-transform:uppercase;font-weight:400;">${item.name}</h4>
-            <p style="font-size:0.8rem;color:var(--grey-mid);">${item.price}</p>
+            <h4 style="font-size:0.85rem;text-transform:uppercase;font-weight:400;">${esc(item.name)}</h4>
+            <p style="font-size:0.8rem;color:var(--grey-mid);">${fmt(item.price)}</p>
           </div>
           <div style="display:flex;gap:0.5rem;align-items:center;">
-            <button class="btn" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="addToCart(${item.id})">Add</button>
+            <button class="btn" style="padding:0.4rem 0.8rem;font-size:0.65rem;" onclick="addToCart(${item.id}); toggleFavorite(${item.id})">Add</button>
             <button style="font-size:1.2rem;padding:0 0.5rem;color:var(--grey-mid);" onclick="toggleFavorite(${item.id})">&times;</button>
           </div>
         </div>`;

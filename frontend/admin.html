@@ -28,7 +28,10 @@
         <h2>Add New Clothing Item</h2>
         <form id="admin-add-product-form" style="display:flex; flex-direction:column; gap:1rem;">
           <input type="text" id="prod-name" placeholder="Item Name" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
-          <input type="text" id="prod-price" placeholder="Price (e.g., € 299.00)" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
+          <input type="text" id="prod-price" placeholder="Price (e.g., 299.00)" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
+          <input type="text" id="prod-category" placeholder="Category (e.g., tops, outerwear)" style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
+          <input type="text" id="prod-sizes" placeholder="Sizes, comma separated (e.g., S,M,L,XL)" style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
+          <input type="text" id="prod-image" placeholder="Image URL (optional)" style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
           <textarea id="prod-desc" placeholder="Product Description Detail..." required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem; font-family:var(--font); height:100px; resize:none;"></textarea>
           <button type="submit" class="btn">Publish to Catalog</button>
         </form>
@@ -65,8 +68,13 @@
           const name = document.getElementById("prod-name").value.trim();
           let rawPrice = document.getElementById("prod-price").value;
           const description = document.getElementById("prod-desc").value.trim();
+          const category = document.getElementById("prod-category").value.trim();
+          const sizes = document.getElementById("prod-sizes").value.trim();
+          const imageUrl = document.getElementById("prod-image").value.trim();
 
-          const cleanPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, ''));
+          // Accept both "299.00" and "299,00"; strip any currency symbols.
+          const normalized = rawPrice.replace(/[^\d.,]/g, '').replace(',', '.');
+          const cleanPrice = parseFloat(normalized);
           if (isNaN(cleanPrice)) {
             alert("Please enter a valid numeric price.");
             return;
@@ -76,9 +84,9 @@
             name: name,
             price: cleanPrice,
             description: description,
-            image_url: "images/products/default.png",
-            category: "Streetwear",
-            sizes: "S,M,L,XL"
+            image_url: imageUrl || "images/products/default.png",
+            category: category || "Uncategorized",
+            sizes: sizes || "S,M,L,XL"
           };
 
           const result = await apiCreateProduct(productPayload);
@@ -105,8 +113,8 @@
         displayContainer.innerHTML = items.map(item => `
           <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid var(--grey-light); padding:1rem; background:#fafafa;">
             <div>
-              <h4 style="font-size:0.85rem; text-transform:uppercase; margin:0;">${item.name}</h4>
-              <p style="font-size:0.8rem; color:var(--grey-mid); margin:0.2rem 0 0 0;">€ ${Number(item.price).toFixed(2)}</p>
+              <h4 style="font-size:0.85rem; text-transform:uppercase; margin:0;">${escapeHTML(item.name)}</h4>
+              <p style="font-size:0.8rem; color:var(--grey-mid); margin:0.2rem 0 0 0;">€ ${Number(item.price).toFixed(2)} · ${escapeHTML(item.category || 'Uncategorized')}</p>
             </div>
             <button class="btn" onclick="deleteProduct(${item.id})" style="padding:0.4rem 0.8rem; font-size:0.65rem; background:#cc3333; border-color:#cc3333; color: white;">Remove</button>
           </div>
@@ -117,11 +125,15 @@
     }
 
     window.deleteProduct = function(id) {
-      alert("Delete functionality will be wired to backend database room in the next sprint!");
-      console.log(`Requesting delete for product ID: ${id}`);
+      // The backend currently exposes no DELETE /products/{id} endpoint, so
+      // removal cannot be performed from the frontend yet.
+      alert("Removing products requires a backend delete endpoint, which isn't available yet.");
+      console.log(`Delete requested for product ID ${id} (no backend route).`);
     }
 
     function executeLogout() {
+      localStorage.removeItem('VIRELLI_CART');
+      localStorage.removeItem('VIRELLI_FAVS');
       localStorage.removeItem('VIRELLI_SESSION');
       window.location.href = 'index.html';
     }

@@ -1,4 +1,3 @@
-
 function getNavHTML(activePage = '') {
   return `
   <nav class="main-nav">
@@ -73,20 +72,15 @@ function getFooterHTML() {
       <div class="footer-links-group">
         <div class="footer-column">
           <h4>Collection</h4>
-          <a href="catalog.html">New Arrivals</a>
           <a href="catalog.html">All Clothing</a>
         </div>
         <div class="footer-column">
           <h4>Company</h4>
-          <a href="about.html">Our Studio</a>
-          <a href="about.html">Sustainability</a>
           <a href="about.html">Contact Us</a>
         </div>
         <div class="footer-column">
           <h4>Account</h4>
-          <a href="auth.html">Sign In</a>
           <a href="user.html">My Profile</a>
-          <a href="checkout.html">My Bag</a>
         </div>
       </div>
     </div>
@@ -191,8 +185,11 @@ async function showLiveResults(query, dropdown) {
     (p.description || '').toLowerCase().includes(query.toLowerCase())
   ).slice(0, 5);
 
+  const esc = (typeof window.escapeHTML === 'function') ? window.escapeHTML : function(v){ return v; };
+  const fmt = (typeof window.formatPrice === 'function') ? window.formatPrice : function(v){ return v; };
+
   if (results.length === 0) {
-    dropdown.innerHTML = `<div class="search-no-results">No results for "${query}"</div>`;
+    dropdown.innerHTML = `<div class="search-no-results">No results for "${esc(query)}"</div>`;
     dropdown.style.display = 'block';
     return;
   }
@@ -201,8 +198,8 @@ async function showLiveResults(query, dropdown) {
     <a href="product.html?id=${p.id}" class="search-result-item">
       <div class="search-result-img"></div>
       <div>
-        <div class="search-result-name">${p.name}</div>
-        <div class="search-result-price">${p.price}</div>
+        <div class="search-result-name">${esc(p.name)}</div>
+        <div class="search-result-price">${fmt(p.price)}</div>
       </div>
     </a>
   `).join('') + `<a href="catalog.html?search=${encodeURIComponent(query)}" class="search-see-all">See all results →</a>`;

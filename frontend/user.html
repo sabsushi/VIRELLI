@@ -75,9 +75,11 @@
         <div class="profile-info-display" id="profile-display"></div>
         <form id="profile-info-form">
           <div class="form-section-title">Update Details</div>
-          <input type="email" id="profile-email" required
+          <label for="profile-email" style="display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--grey-mid); margin-bottom:0.35rem;">Email Address</label>
+          <input type="email" id="profile-email" placeholder="e.g. joao@email.com" required
             style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
-          <input type="text" id="profile-address" required
+          <label for="profile-address" style="display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--grey-mid); margin-bottom:0.35rem;">Default Shipping Address</label>
+          <input type="text" id="profile-address" placeholder="e.g. Rua das Flores 42, 8000-001 Faro" required
             style="width:100%; margin-bottom:1rem; border:1px solid var(--grey-light); padding:0.8rem;">
           <button type="submit" class="btn" style="padding: 0.6rem 1.5rem; font-size:0.7rem;">Save Details</button>
         </form>
@@ -120,6 +122,8 @@
     </div>
   </footer>
 
+  <script src="js/api.js"></script>
+  <script src="js/components.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/user.js"></script>
 </body>

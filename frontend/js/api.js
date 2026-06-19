@@ -54,34 +54,29 @@ async function apiCreateProduct(productData) {
   }
 }
 
-
 async function apiUpdateProduct(id, productData) {
   try {
     const response = await fetch(`${BACKEND_URL}/products/${id}`, {
-      method: "PATCH",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(productData)
     });
-
-    const data = response.ok ? await response.json() : null;
+    const data = await response.json();
     return { success: response.ok, data: data };
   } catch (e) {
-    console.error("Backend unavailable during update of product " + id, e);
+    console.error("Backend unavailable during update.", e);
     return { success: false, data: { detail: "Backend server offline." } };
   }
 }
 
-
 async function apiDeleteProduct(id) {
   try {
     const response = await fetch(`${BACKEND_URL}/products/${id}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" }
+      method: "DELETE"
     });
-    
-    return { success: response.ok };
+    return { success: response.ok || response.status === 204 };
   } catch (e) {
-    console.error("Backend unavailable during deletion of product " + id, e);
+    console.error("Backend unavailable during deletion.", e);
     return { success: false };
   }
 }

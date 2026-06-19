@@ -4,7 +4,6 @@ function getNavHTML(activePage = '') {
     <div class="nav-left">
       <a href="../index.html" class="logo">VIRELLI</a>
       <div class="nav-links">
-        <a href="catalog.html" class="${activePage === 'catalog' ? 'active' : ''}">New</a>
         <a href="catalog.html" class="${activePage === 'collections' ? 'active' : ''}">Collections</a>
         <a href="about.html" class="${activePage === 'about' ? 'active' : ''}">About</a>
       </div>
@@ -118,7 +117,8 @@ function injectLayout(activePage = '') {
     accountLink.title = 'Admin Dashboard';
   }
 
-  
+  // Always initialise live search after the nav is in the DOM
+  if (typeof initLiveSearch === 'function') initLiveSearch();
 }
 
 document.addEventListener('click', function(e) {

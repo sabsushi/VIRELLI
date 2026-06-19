@@ -10,10 +10,13 @@ class ProductBase(BaseModel):
     sizes: Optional[str] = None
     
 class ProductUpdate(BaseModel):
-    name: str | None = None
-    price: float | None = None
-    description: str | None = None
-    
+    name: Optional[str] = None
+    price: Optional[float] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+    category: Optional[str] = None
+    sizes: Optional[str] = None
+
 class ProductResponse(ProductBase):
     id: int
 

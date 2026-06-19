@@ -13,7 +13,8 @@
 
   <main>
     <section class="hero-banner">
-      <span class="hero-placeholder-label">Hero Banner Placeholder [1600 × 600]</span>
+      <img src="images/hero-banner.jpg" alt="Virelli Summer 2026 Collection" class="hero-banner-img">
+      <div class="hero-banner-overlay"></div>
       <div class="hero-overlay-content">
         <h1>New Architecture</h1>
         <p class="hero-season">Summer 2026</p>
@@ -42,12 +43,13 @@
   <script src="js/api.js"></script>
   <script src="js/components.js"></script>
   <script src="js/cart.js"></script>
-  <script src="js/render.js"></script>
   <script>
+    // injectLayout must register before render.js so the nav is in the DOM
+    // when render.js fires its own DOMContentLoaded and calls initLiveSearch.
     document.addEventListener('DOMContentLoaded', () => {
       injectLayout('home');
-      initLiveSearch();
     });
   </script>
+  <script src="js/render.js"></script>
 </body>
 </html>

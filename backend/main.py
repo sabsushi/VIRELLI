@@ -4,7 +4,7 @@ from database import Base, engine
 import models  # registers all models with Base before create_all
 from routes import products, wishlist, checkout, auth, users
 
-
+# Create all database tables on startup if they don't exist
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(

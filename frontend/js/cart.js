@@ -121,7 +121,9 @@ function renderCheckoutCart() {
     return `
       <div class="checkout-item-row">
         <div class="checkout-item-left">
-          <div class="image-placeholder" style="width:60px;height:60px;flex-shrink:0;"></div>
+          <div class="image-placeholder" style="width:60px;height:60px;flex-shrink:0;overflow:hidden;">
+            ${item.image_url ? `<img src="${item.image_url}" alt="${item.name || ''}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
+          </div>
           <div class="checkout-item-meta">
             <h4>${item.name || 'Product'}</h4>
             <p>Size: ${item.size}</p>
@@ -204,7 +206,9 @@ async function renderFavoritesDrawer() {
     if (item) {
       html += `
         <div class="fav-item-row">
-          <div class="image-placeholder" style="width:60px;height:60px;flex-shrink:0;"></div>
+          <div class="image-placeholder" style="width:60px;height:60px;flex-shrink:0;overflow:hidden;">
+            ${item.image_url ? `<img src="${item.image_url}" alt="${esc(item.name)}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : ''}
+          </div>
           <div style="flex-grow:1;">
             <h4 style="font-size:0.85rem;text-transform:uppercase;font-weight:400;">${esc(item.name)}</h4>
             <p style="font-size:0.8rem;color:var(--grey-mid);">${fmt(item.price)}</p>

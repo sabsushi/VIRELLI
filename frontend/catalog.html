@@ -112,9 +112,11 @@
       <div class="filter-section">
         <button class="filter-header" onclick="toggleAccordion('content-cat')">Category <span id="ind-cat">&plus;</span></button>
         <div id="content-cat" class="filter-content" style="display:none;">
-          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="tshirts"> T-Shirts</label>
-          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="shirts"> Shirts</label>
           <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="outerwear"> Outerwear</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="tops"> Tops</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="shirts"> Shirts</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="bottoms"> Bottoms</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="category" data-value="accessories"> Accessories</label>
         </div>
       </div>
 
@@ -130,8 +132,9 @@
       <div class="filter-section">
         <button class="filter-header" onclick="toggleAccordion('content-price')">Price Range <span id="ind-price">&plus;</span></button>
         <div id="content-price" class="filter-content" style="display:none;">
-          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="price" data-value="100-200"> €100 – €200</label>
-          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="price" data-value="200-400"> €200 – €400</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="price" data-value="0-150"> Under €150</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="price" data-value="150-300"> €150 – €300</label>
+          <label class="filter-label"><input type="checkbox" class="filter-check" data-filter="price" data-value="300-600"> €300 – €600</label>
         </div>
       </div>
 
@@ -331,7 +334,9 @@
         return `
         <div class="catalog-card">
           <a href="product.html?id=${item.id}">
-            <div class="card-image"><span style="opacity:0.5;">Product Frame</span></div>
+            <div class="card-image">
+              ${item.image_url ? `<img src="${escapeHTML(item.image_url)}" alt="${escapeHTML(item.name)}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none'">` : `<span style="opacity:0.5;">Product Frame</span>`}
+            </div>
           </a>
           <div class="card-meta">
             <div style="display:flex;flex-direction:column;gap:0.2rem;">

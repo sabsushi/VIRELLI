@@ -7,6 +7,57 @@
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="styles/components.css">
   <title>Admin Dashboard — VIRELLI</title>
+  <style>
+    .admin-size-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+    }
+    .admin-size-grid .size-check-label {
+      display: block;
+      text-align: center;
+      border: 1px solid var(--grey-light);
+      padding: 0.6rem 0;
+      font-size: 0.8rem;
+      cursor: pointer;
+      user-select: none;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+    .admin-size-grid input[type="checkbox"] {
+      display: none;
+    }
+    .admin-size-grid input[type="checkbox"]:checked + .size-check-label {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+
+    /* Estilos para o Modal de Edição (Popup Overlay) */
+    .edit-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .edit-modal-content {
+      background: #ffffff;
+      padding: 2rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid var(--grey-light);
+      box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
 <body>
 
@@ -20,7 +71,7 @@
   <main class="profile-container" id="admin-restricted-content" style="display:none;">
     <header class="profile-header">
       <h1>Inventory Management</h1>
-      <p style="color: var(--grey-mid); font-size: 0.85rem; margin-top: 0.5rem;">Add new seasonal clothes and monitor mock inventory instances.</p>
+      <p style="color: var(--grey-mid); font-size: 0.85rem; margin-top: 0.5rem;">Add new seasonal clothes and monitor live database entries.</p>
     </header>
 
     <div class="profile-grid" style="grid-template-columns: 1fr 1.2fr;">
@@ -29,9 +80,55 @@
         <form id="admin-add-product-form" style="display:flex; flex-direction:column; gap:1rem;">
           <input type="text" id="prod-name" placeholder="Item Name" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
           <input type="text" id="prod-price" placeholder="Price (e.g., 299.00)" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
-          <input type="text" id="prod-category" placeholder="Category (e.g., tops, outerwear)" style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
-          <input type="text" id="prod-sizes" placeholder="Sizes, comma separated (e.g., S,M,L,XL)" style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
-          <input type="text" id="prod-image" placeholder="Image URL (optional)" style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
+          
+          <select id="prod-category" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem; background: #ffffff; font-family: var(--font); font-size: 0.85rem;">
+            <option value="" disabled selected>Select Category</option>
+            <option value="tops">Tops</option>
+            <option value="bottoms">Bottoms</option>
+            <option value="accessories">Accessories</option>
+          </select>
+
+          <div id="subcat-container" style="display: none;">
+            <select id="prod-subcategory" style="width:100%; border:1px solid var(--grey-light); padding:0.8rem; background: #ffffff; font-family: var(--font); font-size: 0.85rem;">
+              <option value="" disabled selected>Select Subcategory</option>
+            </select>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:0.2rem;">
+            <label style="font-size:0.75rem; text-transform:uppercase; color:var(--grey-mid); letter-spacing:0.05em; font-weight:500;">Select Available Sizes</label>
+            <div class="admin-size-grid">
+              <div>
+                <input type="checkbox" name="sizes" value="XS" id="size-xs">
+                <label for="size-xs" class="size-check-label">XS</label>
+              </div>
+              <div>
+                <input type="checkbox" name="sizes" value="S" id="size-s">
+                <label for="size-s" class="size-check-label">S</label>
+              </div>
+              <div>
+                <input type="checkbox" name="sizes" value="M" id="size-m">
+                <label for="size-m" class="size-check-label">M</label>
+              </div>
+              <div>
+                <input type="checkbox" name="sizes" value="L" id="size-l">
+                <label for="size-l" class="size-check-label">L</label>
+              </div>
+              <div>
+                <input type="checkbox" name="sizes" value="XL" id="size-xl">
+                <label for="size-xl" class="size-check-label">XL</label>
+              </div>
+              <div>
+                <input type="checkbox" name="sizes" value="2XL" id="size-2xl">
+                <label for="size-2xl" class="size-check-label">2XL</label>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:0.4rem;">
+            <label style="font-size:0.7rem; text-transform:uppercase; color:var(--grey-mid); letter-spacing:0.05em; font-weight:500;">Product Image File</label>
+            <input type="file" id="prod-image-file" accept="image/*" required style="width:100%; border:1px solid var(--grey-light); padding:0.6rem; background:#ffffff; font-size:0.8rem;">
+          </div>
+
           <textarea id="prod-desc" placeholder="Product Description Detail..." required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem; font-family:var(--font); height:100px; resize:none;"></textarea>
           <button type="submit" class="btn">Publish to Catalog</button>
         </form>
@@ -39,14 +136,84 @@
 
       <div class="profile-card">
         <h2>Live Catalog Registry</h2>
-        <div id="admin-inventory-list" style="display:flex; flex-direction:column; gap:1rem; max-height:450px; overflow-y:auto; padding-right:0.5rem;"></div>
+        <div id="admin-inventory-list" style="display:flex; flex-direction:column; gap:1rem; max-height:550px; overflow-y:auto; padding-right:0.5rem;"></div>
       </div>
     </div>
   </main>
 
+  <div id="edit-product-modal" class="edit-modal-overlay" style="display: none;">
+    <div class="edit-modal-content">
+      <h2 style="margin-top: 0; margin-bottom: 1.5rem;">Edit Product</h2>
+      <form id="admin-edit-product-form" style="display:flex; flex-direction:column; gap:1rem;">
+        <input type="hidden" id="edit-prod-id">
+        
+        <label style="font-size:0.75rem; text-transform:uppercase; color:var(--grey-mid);">Item Name</label>
+        <input type="text" id="edit-prod-name" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
+        
+        <label style="font-size:0.75rem; text-transform:uppercase; color:var(--grey-mid);">Price (€)</label>
+        <input type="text" id="edit-prod-price" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem;">
+        
+        <label style="font-size:0.75rem; text-transform:uppercase; color:var(--grey-mid);">Description</label>
+        <textarea id="edit-prod-desc" required style="width:100%; border:1px solid var(--grey-light); padding:0.8rem; font-family:var(--font); height:80px; resize:none;"></textarea>
+        
+        <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+          <button type="submit" class="btn" style="flex:1;">Save Changes</button>
+          <button type="button" class="btn" onclick="closeEditModal()" style="flex:1; background:#ffffff; color:#000000; border-color:var(--grey-light);">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="js/api.js"></script>
   <script>
-     (async function() {
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function convertFileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    const subcategoriesMap = {
+      tops: ["T-Shirt", "Hoodie", "Sweater"],
+      bottoms: ["Jeans", "Cargo Trousers", "Shorts"],
+      accessories: ["Bag", "Cap", "Socks"]
+    };
+
+    const categorySelect = document.getElementById("prod-category");
+    const subcatContainer = document.getElementById("subcat-container");
+    const subcatSelect = document.getElementById("prod-subcategory");
+
+    if (categorySelect) {
+      categorySelect.addEventListener("change", () => {
+        const selectedCat = categorySelect.value;
+        const options = subcategoriesMap[selectedCat];
+
+        if (options) {
+          subcatSelect.innerHTML = '<option value="" disabled selected>Select Subcategory</option>';
+          options.forEach(sub => {
+            const opt = document.createElement("option");
+            opt.value = sub.toLowerCase();
+            opt.textContent = sub;
+            subcatSelect.appendChild(opt);
+          });
+          subcatContainer.style.display = "block";
+          subcatSelect.required = true;
+        } else {
+          subcatContainer.style.display = "none";
+          subcatSelect.required = false;
+        }
+      });
+    }
+
+    // ---- INICIALIZAÇÃO E CONTROLE DE ACESSO ----
+    (async function() {
       if (document.readyState === 'loading') {
         await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
       }
@@ -60,19 +227,30 @@
       document.getElementById("admin-restricted-content").style.display = "block";
       renderAdminInventory();
 
-
+      // ---- SUBMISSÃO: ADICIONAR PRODUTO ----
       const addForm = document.getElementById("admin-add-product-form");
       if (addForm) {
         addForm.addEventListener("submit", async (e) => {
           e.preventDefault();
+          
           const name = document.getElementById("prod-name").value.trim();
           let rawPrice = document.getElementById("prod-price").value;
           const description = document.getElementById("prod-desc").value.trim();
-          const category = document.getElementById("prod-category").value.trim();
-          const sizes = document.getElementById("prod-sizes").value.trim();
-          const imageUrl = document.getElementById("prod-image").value.trim();
+          const mainCategory = categorySelect.value;
+          const subCategory = subcatSelect.value;
+          
+          const checkedSizeBoxes = document.querySelectorAll('input[name="sizes"]:checked');
+          const sizeValues = Array.from(checkedSizeBoxes).map(cb => cb.value);
+          
+          if (sizeValues.length === 0) {
+            alert("Please select at least one available size.");
+            return;
+          }
+          
+          const sizesString = sizeValues.join(',');
+          const imageFileInput = document.getElementById("prod-image-file");
+          const imageFile = imageFileInput.files[0];
 
-          // Accept both "299.00" and "299,00"; strip any currency symbols.
           const normalized = rawPrice.replace(/[^\d.,]/g, '').replace(',', '.');
           const cleanPrice = parseFloat(normalized);
           if (isNaN(cleanPrice)) {
@@ -80,55 +258,160 @@
             return;
           }
 
-          const productPayload = {
+          try {
+            const base64Image = await convertFileToBase64(imageFile);
+            const combinedCategory = `${mainCategory}:${subCategory}`;
+
+            const jsonPayload = {
+              name: name,
+              price: cleanPrice,
+              description: description,
+              category: combinedCategory,
+              sizes: sizesString,
+              image_url: base64Image
+            };
+
+            const result = await apiCreateProduct(jsonPayload);
+
+            if (result.success) {
+              alert("Product published successfully!");
+              await refreshLocalCatalog();
+              addForm.reset();
+              subcatContainer.style.display = "none";
+              subcatSelect.required = false;
+              renderAdminInventory(); 
+            } else {
+              const errorMessage = result.data && result.data.detail ? result.data.detail : "Error publishing product.";
+              alert(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
+            }
+          } catch (error) {
+            alert("Error processing image file.");
+          }
+        });
+      }
+
+      // ---- SUBMISSÃO: ATUALIZAR/EDITAR PRODUTO ----
+      const editForm = document.getElementById("admin-edit-product-form");
+      if (editForm) {
+        editForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          
+          const id = document.getElementById("edit-prod-id").value;
+          const name = document.getElementById("edit-prod-name").value.trim();
+          let rawPrice = document.getElementById("edit-prod-price").value;
+          const description = document.getElementById("edit-prod-desc").value.trim();
+
+          const normalized = rawPrice.replace(/[^\d.,]/g, '').replace(',', '.');
+          const cleanPrice = parseFloat(normalized);
+          if (isNaN(cleanPrice)) {
+            alert("Please enter a valid numeric price.");
+            return;
+          }
+
+          const jsonPayload = {
             name: name,
             price: cleanPrice,
-            description: description,
-            image_url: imageUrl || "images/products/default.png",
-            category: category || "Uncategorized",
-            sizes: sizes || "S,M,L,XL"
+            description: description
           };
 
-          const result = await apiCreateProduct(productPayload);
+          // Assume que tens a função apiUpdateProduct(id, payload) implementada no teu js/api.js
+          const result = await apiUpdateProduct(id, jsonPayload);   
 
           if (result.success) {
-            alert("Product published successfully!");
-            addForm.reset();
-            renderAdminInventory(); 
+            alert("Product updated successfully!");
+            closeEditModal();
+            await refreshLocalCatalog();
+            renderAdminInventory();
           } else {
-            alert(result.data.detail || "Error publishing product.");
+            alert("Failed to update product database entry.");
           }
         });
       }
     })();
 
-
+    // ---- RENDERIZAR PRODUTOS NA DASHBOARD ----
     async function renderAdminInventory() {
       const displayContainer = document.getElementById("admin-inventory-list");
       if (!displayContainer) return;
 
       try {
         const items = await apiGetAllProducts(); 
+        if (!Array.isArray(items)) {
+          displayContainer.innerHTML = `<p style="color:red; font-size:0.8rem;">Failed to load live registry format.</p>`;
+          return;
+        }
         
-        displayContainer.innerHTML = items.map(item => `
-          <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid var(--grey-light); padding:1rem; background:#fafafa;">
-            <div>
-              <h4 style="font-size:0.85rem; text-transform:uppercase; margin:0;">${escapeHTML(item.name)}</h4>
-              <p style="font-size:0.8rem; color:var(--grey-mid); margin:0.2rem 0 0 0;">€ ${Number(item.price).toFixed(2)} · ${escapeHTML(item.category || 'Uncategorized')}</p>
+        displayContainer.innerHTML = items.map(item => {
+          let displayCategory = item.category || 'Uncategorized';
+          if (displayCategory.includes(':')) {
+            const parts = displayCategory.split(':');
+            displayCategory = `${parts[0]} (${parts[1]})`;
+          }
+
+          // Convertemos o objeto do item para uma string segura para injetar no onclick do Edit
+          const safeItemJson = JSON.stringify(item).replace(/"/g, '&quot;');
+
+          return `
+            <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid var(--grey-light); padding:1rem; background:#fafafa;">
+              <div>
+                <h4 style="font-size:0.85rem; text-transform:uppercase; margin:0;">${escapeHTML(item.name)}</h4>
+                <p style="font-size:0.8rem; color:var(--grey-mid); margin:0.2rem 0 0 0;">€ ${Number(item.price).toFixed(2)} · ${escapeHTML(displayCategory)}</p>
+              </div>
+              <div style="display:flex; gap:0.4rem;">
+                <button class="btn" onclick="openEditModal(${safeItemJson})" style="padding:0.4rem 0.8rem; font-size:0.65rem; background:#ffffff; color:#000000; border-color:var(--grey-light);">Edit</button>
+                <button class="btn" onclick="deleteProduct(${item.id})" style="padding:0.4rem 0.8rem; font-size:0.65rem; background:#cc3333; border-color:#cc3333; color: white;">Remove</button>
+              </div>
             </div>
-            <button class="btn" onclick="deleteProduct(${item.id})" style="padding:0.4rem 0.8rem; font-size:0.65rem; background:#cc3333; border-color:#cc3333; color: white;">Remove</button>
-          </div>
-        `).join("");
+          `;
+        }).join("");
       } catch (error) {
         displayContainer.innerHTML = `<p style="color:red; font-size:0.8rem;">Failed to load live registry.</p>`;
       }
     }
 
-    window.deleteProduct = function(id) {
-      // The backend currently exposes no DELETE /products/{id} endpoint, so
-      // removal cannot be performed from the frontend yet.
-      alert("Removing products requires a backend delete endpoint, which isn't available yet.");
-      console.log(`Delete requested for product ID ${id} (no backend route).`);
+    // ---- ABRE E PREENCHE O MODAL DE EDIÇÃO ----
+    window.openEditModal = function(item) {
+      document.getElementById("edit-prod-id").value = item.id;
+      document.getElementById("edit-prod-name").value = item.name;
+      document.getElementById("edit-prod-price").value = item.price;
+      document.getElementById("edit-prod-desc").value = item.description || '';
+      document.getElementById("edit-product-modal").style.display = "flex";
+    };
+
+    window.closeEditModal = function() {
+      document.getElementById("edit-product-modal").style.display = "none";
+    };
+
+    // ---- ELIMINAR PRODUTO (BD + LOCALSTORAGE) ----
+    window.deleteProduct = async function(id) {
+      if (!confirm("Are you sure you want to permanently delete this item?")) return;
+
+      try {
+        // Envia o pedido HTTP DELETE para a API (implementado no teu js/api.js)
+        const result = await apiDeleteProduct(id);
+
+        if (result.success) {
+          alert("Product successfully deleted from database.");
+          
+          // Sincroniza e limpa as cópias locais
+          await refreshLocalCatalog();
+          
+          // Re-renderiza a lista atualizada no ecrã
+          renderAdminInventory();
+        } else {
+          alert("Error: The server rejected the delete protocol request.");
+        }
+      } catch (error) {
+        alert("Network communication error during deletion.");
+      }
+    };
+
+    // Auxiliar para atualizar a cache local da aplicação
+    async function refreshLocalCatalog() {
+      const updatedItems = await apiGetAllProducts();
+      if (Array.isArray(updatedItems)) {
+        localStorage.setItem("VIRELLI_LOCAL_CATALOG", JSON.stringify(updatedItems));
+      }
     }
 
     function executeLogout() {

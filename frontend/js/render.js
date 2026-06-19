@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   const urlParams = new URLSearchParams(window.location.search);
   const searchParam = urlParams.get('search');
 
-  
   const homeCarousel = document.getElementById('home-featured-items');
   if (homeCarousel) {
     let currentIndex = 0;
@@ -48,11 +47,18 @@ document.addEventListener('DOMContentLoaded', async function() {
       slide.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:absolute;inset:0;';
       slide.innerHTML = items.map(function(item) {
         const isFav = window.favoritesList && window.favoritesList.map(Number).indexOf(Number(item.id)) > -1;
+        
+        let displayCategory = item.category || 'Collection';
+        if (displayCategory.includes(':')) {
+          const parts = displayCategory.split(':');
+          displayCategory = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+        }
+
         return `
           <div class="carousel-product-card">
-            <div class="image-placeholder" role="img" aria-label="${escapeHTML(item.name)} — product image"></div>
+            <div class="image-placeholder" role="img" aria-label="${escapeHTML(item.name)} — product image" style="background-image: url('${item.image_url}'); background-size: cover; background-position: center;"></div>
             <div class="carousel-card-body">
-              <p class="carousel-card-category">${escapeHTML(item.category || 'Collection')}</p>
+              <p class="carousel-card-category">${escapeHTML(displayCategory)}</p>
               <h3 class="carousel-card-name"><a href="product.html?id=${item.id}">${escapeHTML(item.name)}</a></h3>
               <p class="carousel-card-desc">${escapeHTML(item.description)}</p>
               <p class="carousel-card-price">${window.formatPrice(item.price)}</p>
@@ -158,10 +164,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     standardGrid.innerHTML = itemsToRender.map(function(item) {
       const isFav = window.favoritesList && window.favoritesList.map(Number).indexOf(Number(item.id)) > -1;
+      
+      let displayCategory = item.category || 'Collection';
+      if (displayCategory.includes(':')) {
+        const parts = displayCategory.split(':');
+        displayCategory = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+      }
+
       return `
         <div class="product-card">
           <a href="product.html?id=${item.id}">
-            <div class="image-placeholder" role="img" aria-label="${escapeHTML(item.name)} — product image"></div>
+            <div class="image-placeholder" role="img" aria-label="${escapeHTML(item.name)} — product image" style="background-image: url('${item.image_url}'); background-size: cover; background-position: center;"></div>
           </a>
           <h3><a href="product.html?id=${item.id}">${escapeHTML(item.name)}</a></h3>
           <p>${window.formatPrice(item.price)}</p>
@@ -196,31 +209,54 @@ document.addEventListener('DOMContentLoaded', async function() {
     const item = await apiGetProductById(targetId);
     if (item) {
       const isFav = window.favoritesList && window.favoritesList.map(Number).indexOf(Number(item.id)) > -1;
-      const sizeList = (typeof item.sizes === 'string' && item.sizes.trim())
+      
+      // Lista mestre completa que vai sempre renderizar no ecrã
+      const fullSizeGrid = ['XS', 'S', 'M', 'L', 'XL', '2XL'];
+      
+      const availableSizes = (typeof item.sizes === 'string' && item.sizes.trim())
         ? item.sizes.split(',').map(function(s){ return s.trim(); }).filter(Boolean)
-        : ['XS', 'S', 'M', 'L', 'XL', '2XL'];
+        : [];
 
-      let selectedSize = sizeList[0] || '';
+      // Definir o primeiro tamanho disponível como o selecionado por padrão
+      let selectedSize = '';
+      for (let i = 0; i < fullSizeGrid.length; i++) {
+        if (availableSizes.indexOf(fullSizeGrid[i]) > -1) {
+          selectedSize = fullSizeGrid[i];
+          break;
+        }
+      }
+
+      let detailCategory = item.category || 'Collection';
+      if (detailCategory.includes(':')) {
+        const parts = detailCategory.split(':');
+        detailCategory = `${parts[0].charAt(0).toUpperCase() + parts[0].slice(1)} (${parts[1]})`;
+      }
 
       detailContainer.innerHTML = `
         <div class="product-detail-image">
-          <div class="image-placeholder" role="img" aria-label="${escapeHTML(item.name)}"></div>
+          <div class="image-placeholder" role="img" aria-label="${escapeHTML(item.name)}" style="background-image: url('${item.image_url}'); background-size: cover; background-position: center; min-height: 480px;"></div>
         </div>
         <div class="product-info">
-          <p class="product-info-category">${escapeHTML(item.category || 'Collection')}</p>
+          <p class="product-info-category">${escapeHTML(detailCategory)}</p>
           <h1>${escapeHTML(item.name)}</h1>
           <div class="price">${window.formatPrice(item.price)}</div>
           <p class="description">${escapeHTML(item.description)}</p>
 
           <span class="size-label">Select Size</span>
-          <div class="size-options">
-            ${sizeList.map(function(s, i) {
-              return `<button class="size-btn${i === 0 ? ' selected' : ''}" data-size="${escapeHTML(s)}">${escapeHTML(s)}</button>`;
+          <div class="size-options" style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+            ${fullSizeGrid.map(function(s) {
+              const isAvailable = availableSizes.indexOf(s) > -1;
+              if (isAvailable) {
+                const isDefault = s === selectedSize;
+                return `<button class="size-btn${isDefault ? ' selected' : ''}" data-size="${escapeHTML(s)}" style="border: 1px solid #000; background: ${isDefault ? '#000' : '#fff'}; color: ${isDefault ? '#fff' : '#000'}; padding: 0.6rem 1.2rem; cursor: pointer; font-family: var(--font); font-weight: 500;">${escapeHTML(s)}</button>`;
+              } else {
+                return `<button class="size-btn disabled" data-size="${escapeHTML(s)}" disabled style="border: 1px solid var(--grey-light); background: #fafafa; color: #cccccc; padding: 0.6rem 1.2rem; cursor: not-allowed; opacity: 0.4; font-family: var(--font);">${escapeHTML(s)}</button>`;
+              }
             }).join('')}
           </div>
 
           <div class="product-detail-actions">
-            <button class="btn-add-bag" id="detail-add-btn">
+            <button class="btn-add-bag" id="detail-add-btn" ${selectedSize === '' ? 'disabled style="cursor:not-allowed; opacity:0.5;"' : ''}>
               <span class="btn-label">Add to Shopping Bag</span>
               <span class="btn-check">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -247,24 +283,28 @@ document.addEventListener('DOMContentLoaded', async function() {
           </div>
         </div>`;
 
-      // Size button selection
-      detailContainer.querySelectorAll('.size-btn').forEach(function(btn) {
+      // Gerir o click apenas nos botões que não estão disabled
+      detailContainer.querySelectorAll('.size-btn:not([disabled])').forEach(function(btn) {
         btn.addEventListener('click', function() {
-          detailContainer.querySelectorAll('.size-btn').forEach(function(b) { b.classList.remove('selected'); });
+          detailContainer.querySelectorAll('.size-btn:not([disabled])').forEach(function(b) {
+            b.classList.remove('selected');
+            b.style.background = '#fff';
+            b.style.color = '#000';
+          });
           btn.classList.add('selected');
+          btn.style.background = '#000';
+          btn.style.color = '#fff';
           selectedSize = btn.dataset.size;
         });
       });
 
-      // Add to bag with animation
       const addBtn = document.getElementById('detail-add-btn');
-      if (addBtn) {
+      if (addBtn && selectedSize !== '') {
         addBtn.addEventListener('click', function() {
           if (addBtn.classList.contains('added')) return;
           window.addToCart(item.id, selectedSize);
           addBtn.classList.add('added');
 
-          // Show persistent cart reminder bar
           var reminder = document.getElementById('cart-reminder');
           if (reminder) {
             reminder.classList.add('visible');
@@ -277,7 +317,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     }
 
-    // Cart reminder bar — show if cart already has items on page load
     var cartData = JSON.parse(localStorage.getItem('VIRELLI_CART') || '[]');
     var reminder = document.getElementById('cart-reminder');
     if (reminder && cartData.length > 0) {

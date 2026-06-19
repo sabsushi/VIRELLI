@@ -9,6 +9,11 @@ class ProductBase(BaseModel):
     category: Optional[str] = None
     sizes: Optional[str] = None
     
+class ProductUpdate(BaseModel):
+    name: str | None = None
+    price: float | None = None
+    description: str | None = None
+    
 class ProductResponse(ProductBase):
     id: int
 

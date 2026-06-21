@@ -7,76 +7,178 @@
   <link rel="stylesheet" href="styles/global.css">
   <link rel="stylesheet" href="styles/components.css">
   <title>Our Studio — VIRELLI</title>
+  <style>
+    .about-main {
+      max-width: 900px;
+      margin: var(--spacing-xl) auto;
+      padding: 0 var(--spacing-lg);
+      font-family: var(--font);
+      min-height: 65vh;
+    }
+    .about-intro {
+      margin-bottom: var(--spacing-xl);
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .about-intro h1 {
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: var(--spacing-md);
+      color: var(--black);
+      font-weight: 500;
+    }
+    .about-intro p {
+      color: var(--grey-dark);
+      line-height: 1.75;
+      font-size: 0.95rem;
+      max-width: 680px;
+      margin: 0 auto;
+      letter-spacing: 0.02em;
+    }
+    .about-divider {
+      border: 0;
+      border-top: 1px solid var(--grey-light);
+      margin: var(--spacing-xl) 0;
+    }
+    .about-contact {
+      max-width: 500px;
+      margin: 0 auto;
+      padding-bottom: var(--spacing-xl);
+    }
+    .about-contact h2 {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--spacing-lg);
+      text-align: center;
+      color: var(--black);
+      font-weight: 500;
+    }
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--grey-light);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      background: #fafafa;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+      border-color: var(--grey-mid);
+      background: #fff;
+    }
+    .contact-form textarea {
+      height: 130px;
+      resize: none;
+    }
+    .contact-form .btn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* Responsive about footer */
+    .about-footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 4rem;
+    }
+    .about-footer-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 640px) {
+      .about-footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      .about-footer-links {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
-  <nav class="main-nav">
-    <div class="nav-left">
-      <a href="index.html" class="logo">VIRELLI</a>
-      <div class="nav-links">
-        <a href="catalog.html">Shop</a>
-      </div>
-    </div>
-  </nav>
+  <div id="nav-placeholder"></div>
 
-  <main style="max-width: 900px; margin: var(--spacing-xl) auto; padding: 0 var(--spacing-lg); font-family: var(--font); min-height: 65vh;">
-    
-    <section style="margin-bottom: var(--spacing-xl); text-align: center; margin-top: 2rem;">
-      <h1 style="font-size: 1.6rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: var(--spacing-md); color: var(--black); font-weight: 500;">About Our Studio</h1>
-      <p style="color: var(--grey-dark); line-height: 1.75; font-size: 0.95rem; max-width: 680px; margin: 0 auto; letter-spacing: 0.02em;">
-        VIRELLI Studio is a minimalist visual commerce layout engineered entirely as an academic project interface for our Web Programming course module at <strong>ETIC_Algarve</strong>. 
+  <main class="about-main">
+    <section class="about-intro">
+      <h1>About Our Studio</h1>
+      <p>
+        VIRELLI Studio is a minimalist visual commerce layout engineered entirely as an academic project interface for our Web Programming course module at <strong>ETIC_Algarve</strong>.
         <br><br>
         Developed and constructed natively by the student engineering team of <strong>Sabrina</strong> and <strong>Tiago</strong>, this deployment demonstrates modular states, isolated configurations, and highly responsive user flow paths.
       </p>
     </section>
 
-    <hr style="border: 0; border-top: 1px solid var(--grey-light); margin: var(--spacing-xl) 0;">
+    <hr class="about-divider">
 
-    <section style="max-width: 500px; margin: 0 auto; padding-bottom: var(--spacing-xl);">
-      <h2 style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--spacing-lg); text-align: center; color: var(--black); font-weight: 500;">Contact Us</h2>
-      
-      <form id="contact-form" onsubmit="handleContactSubmit(event)" style="display: flex; flex-direction: column; gap: 1.25rem;">
-        <input type="text" placeholder="Your Name" required style="width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light); font-family: var(--font); font-size: 0.85rem; background: #fafafa; outline: none;">
-        <input type="email" placeholder="Email Address" required style="width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light); font-family: var(--font); font-size: 0.85rem; background: #fafafa; outline: none;">
-        <textarea placeholder="Your Message..." required style="width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--grey-light); font-family: var(--font); font-size: 0.85rem; background: #fafafa; height: 130px; resize: none; outline: none;"></textarea>
-        <button type="submit" class="btn" style="padding: 1rem; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;">Send Message</button>
+    <section class="about-contact">
+      <h2>Contact Us</h2>
+      <form id="contact-form" class="contact-form" onsubmit="handleContactSubmit(event)">
+        <input type="text" placeholder="Your Name" required>
+        <input type="email" placeholder="Email Address" required>
+        <textarea placeholder="Your Message..." required></textarea>
+        <button type="submit" class="btn">Send Message</button>
       </form>
     </section>
   </main>
 
-  <footer class="main-footer" style="border-top: 1px solid var(--grey-light); margin-top: 6rem; padding: 4rem 0 2rem 0; font-family: var(--font); background: #ffffff;">
-    <div class="footer-container" style="max-width: 1200px; margin: 0 auto; padding: 0 var(--spacing-lg); display: grid; grid-template-columns: 1.5fr 1fr; gap: 4rem;">
-      <div class="footer-brand" style="display: flex; flex-direction: column; gap: 1rem;">
-        <span class="footer-logo" style="font-size: 1.1rem; font-weight: 600; letter-spacing: 0.2em; color: var(--black);">VIRELLI</span>
-        <p style="font-size: 0.85rem; color: var(--grey-dark); line-height: 1.6; max-width: 400px; margin: 0;">
-          Minimal urban aesthetics engineered for focus. This project is an academic frontend interface developed natively for evaluation.
-        </p>
-      </div>
-      <div class="footer-links-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-        <div class="footer-column" style="display: flex; flex-direction: column; gap: 0.8rem;">
-          <h4 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--black); font-weight: 600; margin-bottom: 0.5rem;">Collection</h4>
-          <a href="catalog.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none;">New Arrivals</a>
-          <a href="catalog.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none;">All Clothing</a>
+  <footer class="main-footer" style="border-top:1px solid var(--grey-light);margin-top:6rem;padding:4rem 0 2rem 0;background:#ffffff;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 var(--spacing-lg);">
+      <div class="about-footer-grid">
+        <div class="footer-brand" style="display:flex;flex-direction:column;gap:1rem;">
+          <span class="footer-logo" style="font-size:1.1rem;font-weight:600;letter-spacing:0.2em;">VIRELLI</span>
+          <p style="font-size:0.85rem;color:var(--grey-dark);line-height:1.6;max-width:400px;margin:0;">
+            Minimal urban aesthetics engineered for focus. An academic frontend interface developed natively for evaluation.
+          </p>
         </div>
-        <div class="footer-column" style="display: flex; flex-direction: column; gap: 0.8rem;">
-          <h4 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--black); font-weight: 600; margin-bottom: 0.5rem;">About</h4>
-          <a href="about.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none; font-weight: 500;">Our Studio</a>
-          <a href="about.html" style="font-size: 0.85rem; color: var(--grey-mid); text-decoration: none; font-weight: 500;">Contact Us</a>
+        <div class="about-footer-links">
+          <div class="footer-column" style="display:flex;flex-direction:column;gap:0.8rem;">
+            <h4 style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--black);font-weight:600;margin-bottom:0.5rem;">Collection</h4>
+            <a href="catalog.html" style="font-size:0.85rem;color:var(--grey-mid);">New Arrivals</a>
+            <a href="catalog.html" style="font-size:0.85rem;color:var(--grey-mid);">All Clothing</a>
+          </div>
+          <div class="footer-column" style="display:flex;flex-direction:column;gap:0.8rem;">
+            <h4 style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--black);font-weight:600;margin-bottom:0.5rem;">About</h4>
+            <a href="about.html" style="font-size:0.85rem;color:var(--grey-mid);">Our Studio</a>
+            <a href="about.html" style="font-size:0.85rem;color:var(--grey-mid);">Contact Us</a>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="footer-bottom" style="max-width: 1200px; margin: 3rem auto 0 auto; padding: 1.5rem var(--spacing-lg) 0 var(--spacing-lg); border-top: 1px solid var(--grey-light); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--grey-mid);">
-      <p>&copy; 2026 VIRELLI Studio. All Rights Reserved.</p>
-      <p style="text-transform: uppercase; letter-spacing: 0.05em;">
-        Designed by <strong>Sabrina & Tiago</strong> &mdash; <strong>ETIC_Algarve Web Programming</strong>
-      </p>
+      <div style="margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--grey-light);display:flex;justify-content:space-between;align-items:center;font-size:0.75rem;color:var(--grey-mid);flex-wrap:wrap;gap:0.5rem;">
+        <p>&copy; 2026 VIRELLI Studio. All Rights Reserved.</p>
+        <p style="text-transform:uppercase;letter-spacing:0.05em;">Designed by <strong>Sabrina &amp; Tiago</strong></p>
+      </div>
     </div>
   </footer>
 
+  <script src="js/api.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/cart.js"></script>
   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      injectLayout('about');
+    });
     function handleContactSubmit(e) {
       e.preventDefault();
-      alert("Message transmitted successfully!");
+      alert('Message transmitted successfully!');
       e.target.reset();
     }
   </script>

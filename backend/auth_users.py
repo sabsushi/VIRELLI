@@ -2,12 +2,21 @@ from fastapi import Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from database import get_db
 from models import User
+import bcrypt
 
 def hash_password(password: str) -> str:
-    return password
+    pwd_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(pwd_bytes, salt)
+    return hashed.decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return plain_password == hashed_password
+    try:
+        plain_bytes = plain_password.encode('utf-8')
+        hashed_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(plain_bytes, hashed_bytes)
+    except Exception:
+        return False
 
 def create_access_token(data: dict) -> str:
     return str(data.get("sub"))

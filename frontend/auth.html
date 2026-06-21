@@ -10,10 +10,12 @@
   <style>
     .auth-container {
       max-width: 460px;
+      width: 100%;
       margin: var(--spacing-xl) auto 6rem auto;
       padding: var(--spacing-lg);
       border: 1px solid var(--grey-light);
       background: #ffffff;
+      box-sizing: border-box;
     }
     .auth-tabs {
       display: flex;
@@ -30,14 +32,9 @@
       color: var(--grey-mid);
       border-bottom: 2px solid transparent;
       transition: all 0.2s;
-      text-decoration: none;
     }
     .auth-tab.active { color: var(--black); font-weight: 500; border-bottom-color: var(--black); }
-    .auth-form {
-      display: none;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
+    .auth-form { display: none; flex-direction: column; gap: 1.25rem; }
     .auth-form.active { display: flex; }
     .auth-form input {
       width: 100%;
@@ -68,24 +65,38 @@
       letter-spacing: 0.08em;
       margin: 0.25rem 0;
     }
+    .auth-message {
+      font-size: 0.82rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      display: none;
+    }
+    .auth-error { background: #fff5f5; border: 1px solid #f5c6cb; color: #c0392b; }
+    .auth-success { background: #f0fff4; border: 1px solid #b2dfdb; color: #27ae60; }
+    .auth-message:not(:empty) { display: block; }
+
+    @media (max-width: 520px) {
+      .auth-container {
+        margin: 2rem 1rem 4rem 1rem;
+        padding: 1.5rem 1.25rem;
+      }
+    }
   </style>
 </head>
 <body>
 
+  <div id="nav-placeholder"></div>
 
   <main>
     <div class="auth-container">
-
       <div class="auth-tabs" id="auth-tabs">
         <span class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">Sign In</span>
         <span class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</span>
       </div>
 
-      
       <div id="auth-error" class="auth-message auth-error"></div>
       <div id="auth-success" class="auth-message auth-success"></div>
 
-      
       <form id="form-signin" class="auth-form active">
         <div style="display:flex;flex-direction:column;gap:0.3rem;">
           <label for="signin-email" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Email Address</label>
@@ -101,7 +112,6 @@
         <button type="button" class="btn" style="background:#fff;color:var(--black);border:1px solid var(--grey-light);" onclick="switchAuthTab('signup')">Create an Account</button>
       </form>
 
-      
       <form id="form-signup" class="auth-form">
         <div style="display:flex;flex-direction:column;gap:0.3rem;">
           <label for="signup-name" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--grey-mid);">Full Name</label>
@@ -123,10 +133,10 @@
         <div class="auth-divider">or</div>
         <button type="button" class="btn" style="background:#fff;color:var(--black);border:1px solid var(--grey-light);" onclick="switchAuthTab('signin')">Sign In Instead</button>
       </form>
-
     </div>
   </main>
 
+  <div id="footer-placeholder"></div>
 
   <script src="js/api.js"></script>
   <script src="js/components.js"></script>
@@ -135,7 +145,6 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       injectLayout();
-      initLiveSearch();
       const session = JSON.parse(localStorage.getItem('VIRELLI_SESSION'));
       if (session) window.location.href = session.role === 'admin' ? 'admin.html' : 'user.html';
     });

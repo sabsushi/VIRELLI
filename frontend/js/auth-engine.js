@@ -86,7 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const signUpForm = document.getElementById("form-signup");
   const API_URL = "http://localhost:8000"; 
 
-  // ---- Sign In ----
   if (signInForm) {
     signInForm.addEventListener("submit", async (e) => { 
       e.preventDefault();
@@ -135,46 +134,48 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
   if (signUpForm) {
-  signUpForm.addEventListener("submit", async (e) => { 
-    e.preventDefault();
-    const name = document.getElementById("signup-name").value.trim();
-    const email = document.getElementById("signup-email").value.trim();
-    const password = document.getElementById("signup-password").value;
+    signUpForm.addEventListener("submit", async (e) => { 
+      e.preventDefault();
+      const name = document.getElementById("signup-name").value.trim();
+      const email = document.getElementById("signup-email").value.trim();
+      const password = document.getElementById("signup-password").value;
+      const confirmPassword = document.getElementById("signup-password-confirm").value;
 
-    try {
-      const response = await fetch(`${API_URL}/auth/register`, { 
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ 
-          username: name, 
-          email: email, 
-          password: password 
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        let registeredUsers = JSON.parse(localStorage.getItem("VIRELLI_USER_DB")) || [];
-
-        registeredUsers.push({ name, email, password });
-        localStorage.setItem("VIRELLI_USER_DB", JSON.stringify(registeredUsers));
-
-        alert("Account created successfully in the database and saved locally!");
-        switchAuthTab("signin");
-      } else {
-        alert(data.detail || "Error creating account on the server.");
+      if (password !== confirmPassword) {
+        alert("Passwords do not match. Please verify.");
+        return;
       }
 
-    } catch (error) {
-      console.error("Error connecting to backend:", error);
-      alert("Backend server is offline. Account could not be saved to database.");
-    }
-  });
-}
+      try {
+        const response = await fetch(`${API_URL}/auth/register`, { 
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ 
+            username: name, 
+            email: email, 
+            password: password 
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert("Account created successfully!");
+          switchAuthTab("signin");
+        } else {
+          alert(data.detail || "Error creating account on the server.");
+        }
+
+      } catch (error) {
+        console.error("Error connecting to backend:", error);
+        alert("Backend server is offline. Account could not be saved.");
+      }
+    });
+  }
 });
 
 function executeLogout() {
@@ -182,6 +183,3 @@ function executeLogout() {
   localStorage.removeItem('VIRELLI_SESSION');
   window.location.href = 'index.html';
 }
-
-
-

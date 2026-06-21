@@ -16,17 +16,7 @@ window.escapeHTML = function escapeHTML(value) {
     .replace(/'/g, '&#39;');
 };
 
-async function apiGetAllProducts() {
-  try {
-    const response = await fetch(`${BACKEND_URL}/products/`);
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch (e) {
-    console.error("Could not load products from backend.", e);
-    return [];
-  }
-}
+
 
 async function apiGetProductById(id) {
   try {
@@ -39,18 +29,38 @@ async function apiGetProductById(id) {
   }
 }
 
-async function apiCreateProduct(productData) {
+async function apiCreateProduct(productPayload) {
   try {
-    const response = await fetch(`${BACKEND_URL}/products/`, {
+    const response = await fetch(`${BACKEND_URL}/products`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(productData)
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(productPayload)
     });
+
     const data = await response.json();
-    return { success: response.ok, data: data };
+
+    if (response.ok) {
+      return { success: true, data: data };
+    } else {
+      return { success: false, data: data };
+    }
+  } catch (error) {
+    console.error("Error creating product:", error);
+    return { success: false, data: { detail: "Network error connecting to backend." } };
+  }
+}
+
+async function apiGetAllProducts() {
+  try {
+    const response = await fetch(`${BACKEND_URL}/products`);
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
   } catch (e) {
-    console.error("Backend unavailable during creation.", e);
-    return { success: false, data: { detail: "Backend server offline." } };
+    console.error("Could not load products from backend.", e);
+    return [];
   }
 }
 

@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     let isAnimating = false;
 
     // Wrap the grid in a clip container so slides animate within bounds
-    homeCarousel.style.cssText = 'position:relative;overflow:hidden;min-height:420px;';
+    homeCarousel.style.cssText = 'position:relative;overflow:hidden;';
 
     function buildSlide(index) {
       const visibleCount = Math.min(3, allProducts.length);
@@ -53,7 +53,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         items.push(allProducts[(index + k) % allProducts.length]);
       }
       const slide = document.createElement('div');
-      slide.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;position:absolute;inset:0;';
+      slide.className = 'carousel-slide-inner';
+      // Do NOT use style.cssText — it overrides the class's display:grid.
+      // Position is managed individually per render path below.
       slide.innerHTML = items.map(function(item) {
         const isFav = window.favoritesList && window.favoritesList.map(Number).indexOf(Number(item.id)) > -1;
         let displayCategory = item.category || 'Collection';
@@ -90,7 +92,16 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       if (direction && homeCarousel.children.length > 0) {
         const outgoing = homeCarousel.children[0];
-
+        // Lock the container height before going absolute so it doesn't collapse
+        homeCarousel.style.height = outgoing.offsetHeight + 'px';
+        outgoing.style.position = 'absolute';
+        outgoing.style.top = '0';
+        outgoing.style.left = '0';
+        outgoing.style.width = '100%';
+        incoming.style.position = 'absolute';
+        incoming.style.top = '0';
+        incoming.style.left = '0';
+        incoming.style.width = '100%';
         // Position incoming off-screen
         incoming.style.transform = direction === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
         incoming.style.opacity = '0';
@@ -113,21 +124,41 @@ document.addEventListener('DOMContentLoaded', async function() {
           outgoing.remove();
           incoming.style.transition = '';
           // Make the container flow-height again now that only one slide exists
-          homeCarousel.style.minHeight = incoming.offsetHeight + 'px';
+          homeCarousel.style.height = incoming.offsetHeight + 'px';
           isAnimating = false;
         }, DURATION + 20);
       } else {
         homeCarousel.innerHTML = '';
-        incoming.style.cssText = incoming.style.cssText + 'opacity:0;transform:translateY(12px);';
+        // Reset container height so it can size naturally from the grid
+        homeCarousel.style.height = '';
+        // Set only opacity/transform — never overwrite cssText which kills display:grid
+        incoming.style.opacity = '0';
+        incoming.style.transform = 'translateY(12px)';
         homeCarousel.appendChild(incoming);
+        // Force reflow so browser registers the initial opacity before transitioning
         incoming.getBoundingClientRect();
-        incoming.style.transition = `opacity 380ms ease, transform 380ms ease`;
+        incoming.style.transition = 'opacity 380ms ease, transform 380ms ease';
         incoming.style.opacity = '1';
         incoming.style.transform = 'translateY(0)';
         setTimeout(function() {
           incoming.style.transition = '';
+          // Now pin the height so directional slides don't collapse the container
+          homeCarousel.style.height = incoming.offsetHeight + 'px';
           isAnimating = false;
-        }, 400);
+        }, 420);
+        // Keep height in sync on resize
+        if (!homeCarousel._resizeHandler) {
+          homeCarousel._resizeHandler = function() {
+            var cur = homeCarousel.children[0];
+            if (cur) {
+              // Let it reflow naturally first
+              cur.style.position = '';
+              homeCarousel.style.height = '';
+              homeCarousel.style.height = cur.offsetHeight + 'px';
+            }
+          };
+          window.addEventListener('resize', homeCarousel._resizeHandler);
+        }
       }
     }
 

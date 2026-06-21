@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="VIRELLI — Admin panel.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <title>Admin Dashboard — VIRELLI</title>
+  <style>
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .field-group label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--grey-mid);
+      font-weight: 500;
+    }
+    .field-group input,
+    .field-group textarea {
+      width: 100%;
+      border: 1px solid var(--grey-light);
+      padding: 0.8rem;
+      font-family: var(--font);
+      font-size: 0.85rem;
+      background: #fff;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+      outline: none;
+    }
+    .field-group input:focus,
+    .field-group textarea:focus {
+      border-color: var(--grey-mid);
+    }
+    .field-group textarea {
+      height: 100px;
+      resize: none;
+    }
+
+    /* Inventory list items */
+    .inventory-item {
+      border: 1px solid var(--grey-light);
+      background: #fafafa;
+      padding: 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .inventory-item-thumb {
+      width: 56px;
+      height: 56px;
+      flex-shrink: 0;
+      background: #efefef;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .inventory-item-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .inventory-item-body {
+      flex-grow: 1;
+      min-width: 0;
+    }
+    .inventory-item-body h4 {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      margin: 0 0 0.2rem 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .inventory-item-body p {
+      font-size: 0.75rem;
+      color: var(--grey-mid);
+      margin: 0;
+    }
+    .inventory-item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex-shrink: 0;
+    }
+    .btn-edit {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.65rem;
+      font-family: var(--font);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid var(--grey-dark);
+      background: #fff;
+      color: var(--grey-dark);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .btn-edit:hover {
+      background: var(--grey-dark);
+      color: #fff;
+    }
+    .btn-delete {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.65rem;
+      font-family: var(--font);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid #cc3333;
+      background: #cc3333;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .btn-delete:hover {
+      background: #aa2222;
+    }
+
+    /* Edit modal overlay */
+    #edit-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    #edit-modal-overlay.open {
+      display: flex;
+    }
+    #edit-modal {
+      background: #fff;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      position: relative;
+    }
+    #edit-modal h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0;
+    }
+    #edit-modal-close {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      color: var(--grey-mid);
+      line-height: 1;
+      padding: 0;
+    }
+    #edit-modal-close:hover {
+      color: var(--black);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .modal-actions .btn {
+      flex: 1;
+    }
+    .btn-cancel {
+      flex: 1;
+      padding: 0.8rem 1.5rem;
+      font-family: var(--font);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: 1px solid var(--grey-light);
+      background: #fff;
+      color: var(--grey-mid);
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+    .btn-cancel:hover {
+      border-color: var(--grey-mid);
+      color: var(--black);
+    }
+
+    /* Form section divider inside add form */
+    .form-section-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--grey-mid);
+      border-bottom: 1px solid var(--grey-light);
+      padding-bottom: 0.4rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Size checkbox grid */
+    .admin-size-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+    }
+    .admin-size-grid input[type="checkbox"] { display: none; }
+    .admin-size-grid .size-check-label {
+      display: block;
+      text-align: center;
+      border: 1px solid var(--grey-light);
+      padding: 0.6rem 0;
+      font-size: 0.78rem;
+      cursor: pointer;
+      user-select: none;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      font-family: var(--font);
+    }
+    .admin-size-grid input[type="checkbox"]:checked + .size-check-label {
+      background: #000000;
+      color: #ffffff;
+      border-color: #000000;
+    }
+
+    /* ---- Responsive Admin ---- */
+    .admin-grid { grid-template-columns: 1fr 1.2fr; }
+    @media (max-width: 1000px) {
+      .admin-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (max-width: 900px) {
+      .profile-grid { grid-template-columns: 1fr !important; gap: 2rem; }
+      .form-row { grid-template-columns: 1fr; }
+      #edit-modal { padding: 1.5rem; margin: 1rem; max-width: calc(100% - 2rem); }
+      .profile-container { padding: 2rem 1.25rem; }
+      .profile-header h1 { font-size: 1.4rem; }
+    }
+    @media (max-width: 600px) {
+      .admin-size-grid { grid-template-columns: repeat(6, 1fr); }
+      .inventory-item-actions { flex-direction: row; flex-wrap: wrap; }
+      .inventory-item { flex-wrap: wrap; }
+      .profile-container { padding: 1.5rem 1rem; }
+      .admin-grid { gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="main-nav" style="justify-content:space-between;">
+    <a href="index.html" class="logo" style="font-family:var(--font-serif);font-size:clamp(1rem,4vw,1.4rem);letter-spacing:0.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%;">VIRELLI Admin</a>
+    <button class="btn" onclick="executeLogout()" style="padding:0.5rem 1.5rem;font-size:0.7rem;white-space:nowrap;flex-shrink:0;">Sign Out</button>
+  </nav>
+
+  <main class="profile-container" id="admin-restricted-content" style="display:none;">
+    <header class="profile-header">
+      <h1>Inventory Management</h1>
+      <p style="color: var(--grey-mid); font-size: 0.85rem; margin-top: 0.5rem;">Add new seasonal clothes and manage catalog items.</p>
+    </header>
+
+    <div class="profile-grid admin-grid">
+
+      <!-- ADD PRODUCT FORM -->
+      <div class="profile-card">
+        <h2>Add New Clothing Item</h2>
+        <form id="admin-add-product-form" style="display:flex; flex-direction:column; gap:1rem;">
+
+          <p class="form-section-label">Basic Info</p>
+
+          <div class="field-group">
+            <label for="prod-name">Item Name</label>
+            <input type="text" id="prod-name" placeholder="e.g. Linen Blazer" required>
+          </div>
+
+          <div class="form-row">
+            <div class="field-group">
+              <label for="prod-price">Price (€)</label>
+              <input type="text" id="prod-price" placeholder="e.g. 299.00" required>
+            </div>
+            <div class="field-group">
+              <label for="prod-category">Category</label>
+              <select id="prod-category" required>
+                <option value="" disabled selected>Select category</option>
+                <option value="outerwear">Outerwear</option>
+                <option value="tops">Tops</option>
+                <option value="shirts">Shirts</option>
+                <option value="bottoms">Bottoms</option>
+                <option value="accessories">Accessories</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Available Sizes</label>
+            <div class="admin-size-grid">
+              <div><input type="checkbox" name="add-sizes" value="XS" id="add-size-xs"><label for="add-size-xs" class="size-check-label">XS</label></div>
+              <div><input type="checkbox" name="add-sizes" value="S" id="add-size-s"><label for="add-size-s" class="size-check-label">S</label></div>
+              <div><input type="checkbox" name="add-sizes" value="M" id="add-size-m"><label for="add-size-m" class="size-check-label">M</label></div>
+              <div><input type="checkbox" name="add-sizes" value="L" id="add-size-l"><label for="add-size-l" class="size-check-label">L</label></div>
+              <div><input type="checkbox" name="add-sizes" value="XL" id="add-size-xl"><label for="add-size-xl" class="size-check-label">XL</label></div>
+              <div><input type="checkbox" name="add-sizes" value="2XL" id="add-size-2xl"><label for="add-size-2xl" class="size-check-label">2XL</label></div>
+            </div>
+          </div>
+
+          <p class="form-section-label">Media &amp; Description</p>
+
+          <div class="field-group">
+            <label for="prod-image">Image URL</label>
+            <input type="text" id="prod-image" placeholder="https://example.com/image.jpg">
+          </div>
+
+          <div class="field-group">
+            <label for="prod-desc">Description</label>
+            <textarea id="prod-desc" placeholder="Product details, material, fit notes..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn">Publish to Catalog</button>
+        </form>
+      </div>
+
+      <!-- LIVE REGISTRY -->
+      <div class="profile-card">
+        <h2>Live Catalog Registry</h2>
+        <div id="admin-inventory-list" style="display:flex; flex-direction:column; gap:0.75rem; max-height:min(600px, 60vh); overflow-y:auto; padding-right:0.5rem;"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- EDIT MODAL -->
+  <div id="edit-modal-overlay">
+    <div id="edit-modal">
+      <button id="edit-modal-close" onclick="closeEditModal()" aria-label="Close">&times;</button>
+      <h2>Edit Product</h2>
+
+      <p class="form-section-label">Basic Info</p>
+
+      <div class="field-group">
+        <label for="edit-name">Item Name</label>
+        <input type="text" id="edit-name" placeholder="e.g. Linen Blazer" required>
+      </div>
+
+      <div class="form-row">
+        <div class="field-group">
+          <label for="edit-price">Price (€)</label>
+          <input type="text" id="edit-price" placeholder="e.g. 299.00" required>
+        </div>
+        <div class="field-group">
+          <label for="edit-category">Category</label>
+          <select id="edit-category" required>
+            <option value="" disabled>Select category</option>
+            <option value="outerwear">Outerwear</option>
+            <option value="tops">Tops</option>
+            <option value="shirts">Shirts</option>
+            <option value="bottoms">Bottoms</option>
+            <option value="accessories">Accessories</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Available Sizes</label>
+        <div class="admin-size-grid">
+          <div><input type="checkbox" name="edit-sizes" value="XS" id="edit-size-xs"><label for="edit-size-xs" class="size-check-label">XS</label></div>
+          <div><input type="checkbox" name="edit-sizes" value="S" id="edit-size-s"><label for="edit-size-s" class="size-check-label">S</label></div>
+          <div><input type="checkbox" name="edit-sizes" value="M" id="edit-size-m"><label for="edit-size-m" class="size-check-label">M</label></div>
+          <div><input type="checkbox" name="edit-sizes" value="L" id="edit-size-l"><label for="edit-size-l" class="size-check-label">L</label></div>
+          <div><input type="checkbox" name="edit-sizes" value="XL" id="edit-size-xl"><label for="edit-size-xl" class="size-check-label">XL</label></div>
+          <div><input type="checkbox" name="edit-sizes" value="2XL" id="edit-size-2xl"><label for="edit-size-2xl" class="size-check-label">2XL</label></div>
+        </div>
+      </div>
+
+      <p class="form-section-label">Media &amp; Description</p>
+
+      <div class="field-group">
+        <label for="edit-image">Image URL</label>
+        <input type="text" id="edit-image" placeholder="https://example.com/image.jpg">
+      </div>
+
+      <div class="field-group">
+        <label for="edit-desc">Description</label>
+        <textarea id="edit-desc" placeholder="Product details, material, fit notes..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+        <button class="btn" id="edit-save-btn" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    let editingProductId = null;
+
+    (async function() {
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+      }
+      const activeUser = JSON.parse(localStorage.getItem("VIRELLI_SESSION"));
+      if (!activeUser || activeUser.role !== "admin") {
+        alert("Access Denied: Administrative Clearance Required.");
+        window.location.href = "auth.html";
+        return;
+      }
+
+      document.getElementById("admin-restricted-content").style.display = "block";
+      renderAdminInventory();
+
+      const addForm = document.getElementById("admin-add-product-form");
+      if (addForm) {
+        addForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = document.getElementById("prod-name").value.trim();
+          const rawPrice = document.getElementById("prod-price").value;
+          const description = document.getElementById("prod-desc").value.trim();
+          const category = document.getElementById("prod-category").value;
+          const imageUrl = document.getElementById("prod-image").value.trim();
+
+          const checkedSizes = Array.from(document.querySelectorAll('input[name="add-sizes"]:checked')).map(cb => cb.value);
+          if (checkedSizes.length === 0) {
+            alert("Please select at least one available size.");
+            return;
+          }
+
+          const normalized = rawPrice.replace(/[^\d.,]/g, '').replace(',', '.');
+          const cleanPrice = parseFloat(normalized);
+          if (isNaN(cleanPrice)) {
+            alert("Please enter a valid numeric price.");
+            return;
+          }
+
+          const productPayload = {
+            name: name,
+            price: cleanPrice,
+            description: description,
+            image_url: imageUrl || null,
+            category: category || "Uncategorized",
+            sizes: checkedSizes.join(',')
+          };
+
+          const submitBtn = addForm.querySelector('button[type="submit"]');
+          submitBtn.textContent = "Publishing...";
+          submitBtn.disabled = true;
+
+          const result = await apiCreateProduct(productPayload);
+
+          submitBtn.textContent = "Publish to Catalog";
+          submitBtn.disabled = false;
+
+          if (result.success) {
+            addForm.reset();
+            renderAdminInventory();
+          } else {
+            alert(result.data.detail || "Error publishing product.");
+          }
+        });
+      }
+
+      // Close modal when clicking the overlay background
+      document.getElementById("edit-modal-overlay").addEventListener("click", function(e) {
+        if (e.target === this) closeEditModal();
+      });
+
+      // Close modal on Escape key
+      document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") closeEditModal();
+      });
+    })();
+
+    async function renderAdminInventory() {
+      const displayContainer = document.getElementById("admin-inventory-list");
+      if (!displayContainer) return;
+      displayContainer.innerHTML = `<p style="font-size:0.8rem;color:var(--grey-mid);">Loading...</p>`;
+
+      try {
+        const items = await apiGetAllProducts();
+
+        if (items.length === 0) {
+          displayContainer.innerHTML = `<p style="font-size:0.8rem;color:var(--grey-mid);">No products in catalog yet.</p>`;
+          return;
+        }
+
+        displayContainer.innerHTML = items.map(item => `
+          <div class="inventory-item">
+            <div class="inventory-item-thumb">
+              ${item.image_url
+                ? `<img src="${escapeHTML(item.image_url)}" alt="${escapeHTML(item.name)}" onerror="this.style.display='none'">`
+                : ''}
+            </div>
+            <div class="inventory-item-body">
+              <h4>${escapeHTML(item.name)}</h4>
+              <p>€ ${Number(item.price).toFixed(2)} &middot; ${escapeHTML(item.category || 'Uncategorized')}</p>
+              ${item.sizes ? `<p style="margin-top:0.15rem;">${escapeHTML(item.sizes)}</p>` : ''}
+            </div>
+            <div class="inventory-item-actions">
+              <button class="btn-edit" onclick="openEditModal(${item.id})">Edit</button>
+              <button class="btn-delete" onclick="deleteProduct(${item.id})">Remove</button>
+            </div>
+          </div>
+        `).join("");
+      } catch (error) {
+        displayContainer.innerHTML = `<p style="color:red; font-size:0.8rem;">Failed to load live registry.</p>`;
+      }
+    }
+
+    window.openEditModal = async function(id) {
+      editingProductId = id;
+      const saveBtn = document.getElementById("edit-save-btn");
+      saveBtn.textContent = "Loading...";
+      saveBtn.disabled = true;
+
+      document.getElementById("edit-modal-overlay").classList.add("open");
+
+      const item = await apiGetProductById(id);
+      if (!item) {
+        alert("Could not load product data.");
+        closeEditModal();
+        return;
+      }
+
+      document.getElementById("edit-name").value = item.name || '';
+      document.getElementById("edit-price").value = item.price != null ? item.price : '';
+      document.getElementById("edit-image").value = item.image_url || '';
+      document.getElementById("edit-desc").value = item.description || '';
+
+      // Set category dropdown
+      const editCatSelect = document.getElementById("edit-category");
+      const catVal = (item.category || '').toLowerCase();
+      editCatSelect.value = catVal;
+      if (!editCatSelect.value) editCatSelect.selectedIndex = 0;
+
+      // Pre-check size boxes
+      const currentSizes = (item.sizes || '').split(',').map(s => s.trim());
+      document.querySelectorAll('input[name="edit-sizes"]').forEach(cb => {
+        cb.checked = currentSizes.indexOf(cb.value) > -1;
+      });
+
+      saveBtn.textContent = "Save Changes";
+      saveBtn.disabled = false;
+    };
+
+    window.closeEditModal = function() {
+      document.getElementById("edit-modal-overlay").classList.remove("open");
+      editingProductId = null;
+    };
+
+    window.saveEdit = async function() {
+      if (!editingProductId) return;
+
+      const rawPrice = document.getElementById("edit-price").value;
+      const normalized = rawPrice.replace(/[^\d.,]/g, '').replace(',', '.');
+      const cleanPrice = parseFloat(normalized);
+      if (isNaN(cleanPrice)) {
+        alert("Please enter a valid numeric price.");
+        return;
+      }
+
+      const editCheckedSizes = Array.from(document.querySelectorAll('input[name="edit-sizes"]:checked')).map(cb => cb.value);
+      if (editCheckedSizes.length === 0) {
+        alert("Please select at least one available size.");
+        return;
+      }
+
+      const productPayload = {
+        name: document.getElementById("edit-name").value.trim(),
+        price: cleanPrice,
+        description: document.getElementById("edit-desc").value.trim(),
+        image_url: document.getElementById("edit-image").value.trim() || null,
+        category: document.getElementById("edit-category").value || "Uncategorized",
+        sizes: editCheckedSizes.join(',')
+      };
+
+      const saveBtn = document.getElementById("edit-save-btn");
+      saveBtn.textContent = "Saving...";
+      saveBtn.disabled = true;
+
+      const result = await apiUpdateProduct(editingProductId, productPayload);
+
+      saveBtn.textContent = "Save Changes";
+      saveBtn.disabled = false;
+
+      if (result.success) {
+        closeEditModal();
+        renderAdminInventory();
+      } else {
+        alert(result.data?.detail || "Error saving changes.");
+      }
+    };
+
+    window.deleteProduct = async function(id) {
+      if (!confirm("Remove this product from the catalog? This cannot be undone.")) return;
+
+      const result = await apiDeleteProduct(id);
+      if (result.success) {
+        renderAdminInventory();
+      } else {
+        alert("Could not remove the product. The backend may not support deletion yet.");
+      }
+    };
+
+    function executeLogout() {
+      localStorage.removeItem('VIRELLI_CART');
+      localStorage.removeItem('VIRELLI_FAVS');
+      localStorage.removeItem('VIRELLI_SESSION');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

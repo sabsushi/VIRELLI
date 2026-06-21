@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="VIRELLI — Your account.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <title>Account — VIRELLI</title>
+  <style>
+    @media (max-width: 900px) {
+      .profile-container { padding: 2rem 1.25rem; }
+      .profile-grid { grid-template-columns: 1fr !important; gap: 2rem; }
+      .profile-header h1 { font-size: 1.6rem; }
+    }
+    @media (max-width: 480px) {
+      .profile-container { padding: 1.5rem 1rem; }
+      .profile-header h1 { font-size: 1.4rem; }
+      .profile-info-display strong { display: block; width: auto; margin-bottom: 0.2rem; }
+    }
+    .profile-input {
+      width: 100%;
+      margin-bottom: 1rem;
+      border: 1px solid var(--grey-light);
+      padding: 0.8rem;
+      font-family: var(--font);
+      font-size: 0.85rem;
+      background: #fafafa;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .profile-input:focus {
+      border-color: var(--grey-mid);
+      background: #fff;
+    }
+    .profile-label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--grey-mid);
+      margin-bottom: 0.35rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="nav-placeholder"></div>
+
+  <main class="profile-container">
+    <header class="profile-header">
+      <h1>My Account</h1>
+    </header>
+    <div class="profile-grid">
+      <div class="profile-card">
+        <h2>Personal Information</h2>
+        <div class="profile-info-display" id="profile-display"></div>
+        <form id="profile-info-form">
+          <div class="form-section-title">Update Details</div>
+          <label for="profile-email" class="profile-label">Email Address</label>
+          <input type="email" id="profile-email" placeholder="e.g. joao@email.com" required class="profile-input">
+          <label for="profile-address" class="profile-label">Default Shipping Address</label>
+          <input type="text" id="profile-address" placeholder="e.g. Rua das Flores 42, 8000-001 Faro" required class="profile-input">
+          <button type="submit" class="btn" style="padding:0.6rem 1.5rem;font-size:0.7rem;">Save Details</button>
+        </form>
+      </div>
+      <div class="profile-card">
+        <h2>Security</h2>
+        <form id="password-form">
+          <div class="form-section-title">Change Password</div>
+          <label for="current-pass" class="profile-label">Current Password</label>
+          <input type="password" id="current-pass" placeholder="Current Password" required class="profile-input">
+          <label for="new-pass" class="profile-label">New Password</label>
+          <input type="password" id="new-pass" placeholder="New Password" required class="profile-input">
+          <button type="submit" class="btn" style="padding:0.6rem 1.5rem;font-size:0.7rem;">Update Password</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/user.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      injectLayout('account');
+    });
+  </script>
+</body>
+</html>

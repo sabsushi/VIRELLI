@@ -184,7 +184,57 @@ This project was developed with assistance from the following AI tools:
 | **Gemini (Google)** | Initial `Dockerfile` and `docker-compose.yml` architecture, `uv` integration for faster Docker builds, `.gitignore` configuration, debugging Docker environment consistency |
 | **GitHub Copilot** | Inline code suggestions during development of FastAPI routes and SQLAlchemy queries |
 
-All AI-generated code was reviewed, tested and understood before being committed. Every team member can explain any part of the codebase.
+## BACKEND (FastApi/SQLite/SQLAlchemy)
+
+## 1. Core Architecture & Development Support
+During the initial phase of development, Artificial Intelligence was utilized as a theoretical and practical support tool to define and structure the API mechanics and user authentication flows.
+
+* **Token-Based Authentication Concepts:** Assisted in understanding the theoretical lifecycle and operation of JSON Web Tokens (JWT), client-side persistence strategies (`localStorage`), and secure transmission over HTTP headers (`Authorization: Bearer <token>`).
+* **FastAPI Backend Implementation:** Supported the structural code generation and route planning for the FastAPI Python framework, leveraging SQLAlchemy ORM patterns and Pydantic schemas for strict data validation.
+* **Full-Stack Integration:** Guided the continuous mapping of data layers, effectively bridging dynamic client-side rendering files in JavaScript (`js/components.js`, `js/render.js`) with specific asynchronous endpoints exposed by the API.
+
+---
+
+## 2. Infrastructure & Database Troubleshooting
+Focused on debugging critical data persistence failures caused by the project's containerized infrastructure.
+
+### 2.1. SQL Data Persistence Failure (Docker Volumes)
+* **Issue Identified:** Data submitted through frontend forms was not being permanently stored in the SQLite database tables after the Docker container lifecycle ended.
+* **Diagnosis:** The `DATABASE_URL` path was pointing to a volatile, temporary directory inside the isolated Docker container filesystem, completely unmapped from the host computer.
+* **Solution Applied:** 1. Reconfigured the environment variable to point to `/app/virelli.db`, forcing direct mapping to the shared persistent volume directory located within `/backend`.
+  2. Restarted and rebuilt the containerized environment (`docker compose down` and `up -d`).
+  3. Manually purged the browser's client-side cache (`localStorage`) to discard conflicting obsolete states.
+
+### 2.2. Bcrypt Library Hashing Failure
+* **Issue Identified:** A misleading error message was triggered inside the Swagger UI documentation sandbox, claiming that user passwords exceeded the strict 72-byte limit.
+* **Diagnosis:** The core underlying `bcrypt` hashing algorithm strictly requires binary input data (`bytes`). However, the FastAPI router layer was passing raw textual data (`strings`) directly to it.
+* **Solution Applied:** Refactored the Python cryptography helper functions by applying `.encode('utf-8')` to incoming password strings prior to submitting them to the `bcrypt.hashpw()` method, and used `.decode('utf-8')` to safely store the resulting secure hash as database-compatible string blocks inside SQLite.
+
+---
+
+## 3. Frontend Integration & UI/UX Bug Fixing
+Resolved dynamic browser rendering errors caused by variable type crashes and asymmetric DOM manipulations.
+
+### 3.1. Checkout Order List Crash
+* **Issue Identified:** The shopping bag item rows within the final checkout display view completely disappeared or failed to render during runtime.
+* **Diagnosis:** A critical JavaScript execution crash occurred because the client-side code tried to perform text manipulation routines on a field where the API backend returned a numeric object (`float` value like `45.00` instead of a static formatted string like `"45.00€"`).
+* **Solution Applied:** Adjusted the data types inside the local template loops to ensure JavaScript treats the currency values as true floating-point numbers, delegating visual symbols and currency formatting rules exclusively to isolated UI helper methods.
+
+### 3.2. Wishlist Synchronization and Dynamic Removal
+* **Issue Identified:** The sliding contextual favorites drawer displayed generic `Product #1` placeholders instead of actual catalog names, and action buttons suffered from inaccurate overlapping CSS layout layers.
+* **Diagnosis:** The `GET /wishlist/me` endpoint was returning unmapped, raw table structures lacking proper entity relationships. Furthermore, the UI lacked an automated *Event Delegation* strategy to intercept asynchronous actions safely.
+* **Solution Applied:**
+  1. Optimized the backend routing Python query by introducing an explicit `.join()` method on the `Product` table to immediately append the `product_name` attribute to the payload.
+  2. Fixed stacking layout priorities by adjusting CSS `z-index` properties on the sliding sidebar components.
+  3. Implemented an asynchronous workflow where triggering "Add to Bag" fires a non-blocking `POST` request to clear the item from the DB wishlist, appends the metadata to the active shopping cart layout (`window.addToCart`), and triggers a fluid visual fade-out transition row animation without requiring a full page refresh.
+
+---
+
+## 4. Transition from Hardcoded Data to Dynamic Backoffice
+* **Objective:** Remove static data layers pre-populated directly into the client-side source code and transition the layout into a fully authenticated, dynamic catalog dashboard.
+* **AI Methodology Applied:**
+  * Replaced outdated local fallback mechanisms (storing mock product structures inside local browser arrays) with native JavaScript asynchronous `fetch` requests targeted at the server's `POST /products/` API endpoint.
+  * Implemented string-cleaning routines inside the backoffice admin interface panels, ensuring that human-input values containing currency markers (e.g., "€ 299.00") are sanitized into valid numbers (`floats`) before being validated against the FastAPI Pydantic parsing schemas.
 
 ---
 

@@ -44,6 +44,11 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
+    address: Optional[str] = None
+
+class Wishlist(BaseModel):
+    product_id: int
+    size: Optional[str] = None
 
 class Token(BaseModel):
     access_token: str

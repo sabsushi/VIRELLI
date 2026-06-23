@@ -317,7 +317,7 @@
 
           <div class="field-group">
             <label for="prod-image">Image URL</label>
-            <input type="text" id="prod-image" placeholder="https://example.com/image.jpg">
+            <input type="file" id="prod-image" accept="image/jpeg,image/png,image/webp">
           </div>
 
           <div class="field-group">
@@ -440,7 +440,33 @@
         const rawPrice = document.getElementById("prod-price").value;
         const description = document.getElementById("prod-desc").value.trim();
         const category = document.getElementById("prod-category").value;
-        const imageUrl = document.getElementById("prod-image").value.trim();
+
+        let imageUrl = null;
+
+        const imageFile = document.getElementById("prod-image").files[0];
+        if (imageFile) {
+            const formData = new FormData();
+            formData.append("file", imageFile);
+            
+            try {
+                const uploadRes = await fetch(`${BACKEND_URL}/products/upload-image`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!uploadRes.ok) {
+                    throw new Error(`Upload status: ${uploadRes.status}`);
+                }
+
+                const uploadData = await uploadRes.json();
+                imageUrl = uploadData.url; 
+                console.log("Imagem guardada em: ", imageUrl);
+            } catch (uploadError) {
+                console.error("Erro no upload:", uploadError);
+                alert("Falha ao carregar a imagem para o servidor. O produto não foi criado.");
+                return;
+            }
+        }
 
         const checkedSizes = Array.from(document.querySelectorAll('input[name="add-sizes"]:checked')).map(cb => cb.value);
         if (checkedSizes.length === 0) {
@@ -459,7 +485,7 @@
           name: name,
           price: cleanPrice,
           description: description,
-          image_url: imageUrl || null,
+          image_url: imageUrl, 
           category: category || "Uncategorized",
           sizes: checkedSizes.join(',')
         };
@@ -474,12 +500,13 @@
         submitBtn.disabled = false;
 
         if (result.success) {
+          alert("Product published successfully!"); 
           updateProductInLocalStorage(result.data);
           
           addForm.reset();
           renderAdminInventory();
         } else {
-          alert(result.data.detail || "Error publishing product.");
+          alert(result.data?.detail || "Error publishing product.");
         }
       });
     }
@@ -585,11 +612,31 @@
       return;
     }
 
+    let currentImageUrl = document.getElementById("edit-image").value.trim() || null;
+
+    const editImageFileInput = document.getElementById("edit-image-file");
+    if (editImageFileInput && editImageFileInput.files[0]) {
+        const formData = new FormData();
+        formData.append("file", editImageFileInput.files[0]);
+        try {
+            const uploadRes = await fetch(`${BACKEND_URL}/products/upload-image`, {
+                method: "POST",
+                body: formData
+            });
+            if (uploadRes.ok) {
+                const uploadData = await uploadRes.json();
+                currentImageUrl = uploadData.url;
+            }
+        } catch (err) {
+            console.error("Erro ao atualizar imagem na edição:", err);
+        }
+    }
+
     const productPayload = {
       name: document.getElementById("edit-name").value.trim(),
       price: cleanPrice,
       description: document.getElementById("edit-desc").value.trim(),
-      image_url: document.getElementById("edit-image").value.trim() || null,
+      image_url: currentImageUrl,
       category: document.getElementById("edit-category").value || "Uncategorized",
       sizes: editCheckedSizes.join(',')
     };
@@ -604,6 +651,7 @@
     saveBtn.disabled = false;
 
     if (result.success) {
+      alert("Changes saved successfully!");
       updateProductInLocalStorage(result.data);
 
       closeEditModal();
@@ -618,6 +666,7 @@
 
     const result = await apiDeleteProduct(id);
     if (result.success) {
+      alert("Product removed successfully!");
       updateProductInLocalStorage({ id: id }, true);
       
       renderAdminInventory();

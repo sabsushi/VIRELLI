@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!displayBox) return;
     displayBox.innerHTML = `
       <p><strong>Account Privilege:</strong> ${session.role ? session.role.toUpperCase() : 'USER'}</p>
-      <p><strong>Full Name:</strong> ${session.name || 'Not configured'}</p>
+      <p><strong>Full Name:</strong> ${session.username || 'Not configured'}</p>
       <p><strong>Email Address:</strong> ${session.email || '—'}</p>
       <p><strong>Default Address:</strong> ${session.address || 'Not configured'}</p>
       <button class="btn" onclick="executeLogout()" style="margin-top:1.5rem;padding:0.5rem 1.5rem;font-size:0.75rem;background:#8c8c8c;border-color:#8c8c8c;color:white;">Sign Out</button>
@@ -46,12 +46,39 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Update session and persist
-      session.email   = newEmail;
-      session.address = newAddress;
-      localStorage.setItem('VIRELLI_SESSION', JSON.stringify(session));
-      renderProfile();
-      showUserMsg('profile-msg', 'Details saved successfully.', 'success');
+      if (!session.token) {
+        showUserMsg('profile-msg', 'Session error — please sign in again.', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/users/me`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.token}`
+          },
+          body: JSON.stringify({ 
+            email: newEmail,
+            address: newAddress 
+          })
+        });
+
+        if (response.ok) {
+          // Só atualiza o localStorage se o backend aceitar a mudança com sucesso
+          session.email   = newEmail;
+          session.address = newAddress;
+          localStorage.setItem('VIRELLI_SESSION', JSON.stringify(session));
+          
+          renderProfile();
+          showUserMsg('profile-msg', 'Details saved successfully.', 'success');
+        } else {
+          const data = await response.json();
+          showUserMsg('profile-msg', data.detail || 'Could not update profile. Please try again.', 'error');
+        }
+      } catch (err) {
+        showUserMsg('profile-msg', 'Cannot reach the server. Make sure the backend is running.', 'error');
+      }
     });
   }
 

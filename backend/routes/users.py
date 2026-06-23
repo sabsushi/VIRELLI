@@ -27,6 +27,8 @@ def update_me(data: UserUpdate, db: Session = Depends(get_db), current_user: Use
         current_user.email = data.email
     if data.password:
         current_user.hashed_password = hash_password(data.password)
+    if data.address is not None:
+        current_user.address = data.address
 
     db.commit()
     db.refresh(current_user)

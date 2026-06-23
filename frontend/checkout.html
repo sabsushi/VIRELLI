@@ -508,6 +508,9 @@
     function generateInvoiceFromServer(orderDetails) {
       const date = new Date().toLocaleDateString('en-GB', { year:'numeric', month:'long', day:'numeric' });
       const itemMap = {};
+
+      console.log(orderDetails);
+      console.log(orderDetails.items);
       
       orderDetails.items.forEach(item => {
         const key = (item.id != null ? item.id : item.name) + '__' + (item.size || '');

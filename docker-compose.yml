@@ -8,8 +8,10 @@ services:
       - "8000:8000" 
     volumes:
       - ./backend:/app
+      - ./frontend/images/products:/app/images
     environment:
       - DATABASE_URL=sqlite:////app/virelli.db
+
 
   frontend:
     image: nginx:alpine

@@ -185,6 +185,8 @@ function injectLayout(activePage = '') {
 
   // Always initialise live search after the nav is in the DOM
   if (typeof initLiveSearch === 'function') initLiveSearch();
+
+  updateFavCountFromBackend();
 }
 
 function enforceNavLayout() {
@@ -302,20 +304,30 @@ function initMobileSearch() {
   }
 }
 
-// Favorites drawer toggling
-document.addEventListener('click', function(e) {
-  if (e.target.closest('#fav-toggle-btn')) {
+// --- Favorites drawer toggling with Backend integration ---
+document.addEventListener('click', async function(e) {
+  // 1. If clicking the favorites button (Desktop or Mobile)
+  if (e.target.closest('#fav-toggle-btn') || e.target.closest('#mobile-fav-btn')) {
     const drawer = document.getElementById('favorites-drawer');
-    if (drawer) drawer.classList.toggle('open');
+    if (drawer) {
+      drawer.classList.toggle('open');
+      
+      // If the drawer opened, fetch favorites from the database
+      if (drawer.classList.contains('open')) {
+        await renderWishlistItems();
+      }
+    }
     return;
   }
 
+  // 2. If clicking the close button (X) of the drawer
   if (e.target.closest('#fav-close-btn')) {
     const drawer = document.getElementById('favorites-drawer');
     if (drawer) drawer.classList.remove('open');
     return;
   }
 
+  // 3. If clicking outside the drawer, close it
   const drawer = document.getElementById('favorites-drawer');
   if (
     drawer &&
@@ -328,7 +340,79 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// Live search (desktop)
+// --- Function to fetch wishlist data and render HTML inside the drawer ---
+async function renderWishlistItems() {
+  const container = document.getElementById('fav-modal-items');
+  if (!container) return;
+
+  const session = JSON.parse(localStorage.getItem('VIRELLI_SESSION'));
+  if (!session || !session.token) {
+    container.innerHTML = '<div style="padding:1.5rem; font-size:0.8rem; text-align:center;">Please sign in to view your wishlist.</div>';
+    return;
+  }
+
+  container.innerHTML = '<div style="padding:1.5rem; font-size:0.8rem; text-align:center; color:#8c8c8c;">Loading…</div>';
+
+  try {
+    const response = await fetch('http://localhost:8000/wishlist/me', {
+      method: 'GET',
+      headers: { 
+        'Authorization': `Bearer ${session.token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const items = await response.json();
+      
+      // Update visual counter badge
+      const favBadge = document.getElementById('fav-count');
+      if (favBadge) favBadge.textContent = items.length;
+
+      if (items.length === 0) {
+        container.innerHTML = '<div style="padding:1.5rem; font-size:0.8rem; text-align:center; color:#8c8c8c;">Your wishlist is empty.</div>';
+        return;
+      }
+
+      // Render wishlist items dynamically
+      // --- 1. DYNAMICALLY RENDER WISHLIST ITEMS WITHIN DRAWER ---
+      // We read from item.product_name or fallback gracefully to the ID template string
+      container.innerHTML = items.map(item => {
+        const displayName = item.product_name || (item.product ? item.product.name : `Product #${item.product_id}`);
+        const esc = (typeof escapeHTML === 'function') ? escapeHTML : function(v){ return v; };
+
+        return `
+          <div class="fav-item" style="display:flex; justify-content:space-between; align-items:center; padding:1rem 0; border-bottom:1px solid #f5f5f5;">
+            <div style="font-size:0.8rem; font-family:inherit;">
+              <p style="margin:0; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--black);">
+                ${esc(displayName)}
+              </p>
+              ${item.size ? `<p style="margin:0.2rem 0 0 0; font-size:0.7rem; color:#8c8c8c;">Size: ${esc(item.size)}</p>` : ''}
+            </div>
+            
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem;">
+              <button class="wishlist-add-to-bag-btn" 
+                      data-id="${item.product_id}" 
+                      data-size="${esc(item.size || '')}" 
+                      style="background:var(--black); color:#fff; border:1px solid var(--black); padding:0.4rem 0.8rem; font-size:0.65rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; font-family:var(--font); transition:all 0.2s ease;">
+                Add to Bag
+              </button>
+              <a href="product.html?id=${item.product_id}" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; text-decoration:underline; color:var(--grey-mid);">
+                View
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      container.innerHTML = '<div style="padding:1.5rem; font-size:0.8rem; text-align:center; color:#c0392b;">Could not load items.</div>';
+    }
+  } catch (err) {
+    container.innerHTML = '<div style="padding:1.5rem; font-size:0.8rem; text-align:center; color:#c0392b;">Server connection failed.</div>';
+  }
+}
+
+// --- 2. LIVE SEARCH CONTROLS (DESKTOP) ---
 function initLiveSearch() {
   const input = document.getElementById('nav-search-input');
   const dropdown = document.getElementById('search-dropdown');
@@ -366,6 +450,7 @@ function initLiveSearch() {
   });
 }
 
+// --- 3. RENDERING SEARCH RESULTS IN DROPDOWN ---
 async function showLiveResults(query, dropdown) {
   const products = await apiGetAllProducts();
   const results = products.filter(p =>
@@ -393,3 +478,94 @@ async function showLiveResults(query, dropdown) {
   `).join('') + `<a href="catalog.html?search=${encodeURIComponent(query)}" class="search-see-all">See all results &rarr;</a>`;
   dropdown.style.display = 'block';
 }
+
+// --- 4. COUNTER UPDATE FROM BACKEND ---
+async function updateFavCountFromBackend() {
+  const session = JSON.parse(localStorage.getItem('VIRELLI_SESSION'));
+  if (!session || !session.token) return;
+
+  try {
+    const response = await fetch('http://localhost:8000/wishlist/me', {
+      headers: { 'Authorization': `Bearer ${session.token}` }
+    });
+    if (response.ok) {
+      const items = await response.json();
+      const favCountBadge = document.getElementById('fav-count');
+      if (favCountBadge) {
+        favCountBadge.textContent = items.length;
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching wishlist items count:", err);
+  }
+}
+
+
+// --- 5. EVENT DELEGATION FOR DRAWER ADD-TO-BAG ACTIONS ---
+document.addEventListener('click', async function(e) {
+  const addToBagBtn = e.target.closest('.wishlist-add-to-bag-btn');
+  
+  if (addToBagBtn) {
+    e.preventDefault();
+    
+    // Find the parent item row wrapper to animate removal later
+    const wishlistRow = addToBagBtn.closest('.fav-item');
+    const productId = addToBagBtn.getAttribute('data-id');
+    const productSize = addToBagBtn.getAttribute('data-size');
+    
+    // 1. Add the item to the standard shopping bag
+    if (typeof window.addToCart === 'function') {
+      window.addToCart(productId, productSize);
+    } else {
+      console.error("The global window.addToCart function layout could not be found.");
+      return;
+    }
+
+    // 2. Remove the item from the backend Database Wishlist automatically
+    const session = JSON.parse(localStorage.getItem('VIRELLI_SESSION'));
+    if (session && session.token) {
+      try {
+        const response = await fetch('http://localhost:8000/wishlist/add', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            product_id: parseInt(productId, 10),
+            size: productSize
+          })
+        });
+
+        if (response.ok) {
+          // 3. Trigger the header counter badge update if the method exists
+          if (typeof updateFavCountFromBackend === 'function') {
+            await updateFavCountFromBackend();
+          }
+
+          // 4. Animate the interface row item removal for a premium UX feel
+          if (wishlistRow) {
+            wishlistRow.style.transition = 'all 0.35s ease';
+            wishlistRow.style.opacity = '0';
+            wishlistRow.style.transform = 'translateX(20px)';
+            
+            setTimeout(() => {
+              wishlistRow.remove();
+              
+              // If the wishlist container is now empty, display a clean state message
+              const container = document.getElementById('favorites-drawer-container') || wishlistRow.parentNode;
+              if (container && container.querySelectorAll('.fav-item').length === 0) {
+                container.innerHTML = '<div style="padding:2rem; font-size:0.8rem; text-align:center; color:var(--grey-mid);">Your wishlist is empty.</div>';
+              }
+            }, 350);
+          }
+        } else {
+          console.error("Backend failed to clear item from wishlist table hierarchy.");
+        }
+      } catch (err) {
+        console.error("Network communication error while syncing wishlist states:", err);
+      }
+    }
+  }
+});
+

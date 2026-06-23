@@ -355,3 +355,68 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 });
+
+// --- Listen for clicks on the dynamic product page wishlist button ---
+// --- Listen for clicks on the dynamic product page wishlist button ---
+document.addEventListener('click', async function(e) {
+  // Check if the clicked element is the heart button or inside it
+  const heartBtn = e.target.closest('#detail-fav-btn');
+  
+  if (heartBtn) {
+    // Prevent default behaviors and block older inline onclick listeners
+    e.preventDefault();
+    e.stopImmediatePropagation();
+
+    // 1. Extract the product ID from the current URL query parameters (?id=X)
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if (!productId) {
+      console.error("Product ID not found in URL parameters.");
+      return;
+    }
+
+    // 2. Find the selected size button element to extract the size string
+    const selectedSizeEl = document.querySelector('.size-btn.selected');
+    const selectedSize = selectedSizeEl ? selectedSizeEl.getAttribute('data-size') : null;
+
+    // 3. Retrieve authentication credentials from browser localStorage
+    const session = JSON.parse(localStorage.getItem('VIRELLI_SESSION'));
+    if (!session || !session.token) {
+      alert("Please sign in to add items to your wishlist.");
+      return;
+    }
+
+    try {
+      // 4. Send the POST request payload directly to the FastAPI backend service
+      const response = await fetch('http://localhost:8000/wishlist/add', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          product_id: parseInt(productId, 10),
+          size: selectedSize
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Database updated successfully:", result.detail);
+        
+        // Toggle active visual styles on the UI heart button element
+        heartBtn.classList.toggle('active');
+        
+        // Dynamically re-render the side drawer items if the function exists
+        if (typeof renderWishlistItems === 'function') {
+          await renderWishlistItems();
+        }
+      } else {
+        console.error("Server backend rejected the payload execution. Status:", response.status);
+      }
+    } catch (err) {
+      console.error("Failed to establish networking connection with the wishlist API:", err);
+    }
+  }
+});

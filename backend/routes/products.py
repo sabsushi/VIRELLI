@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import os
+import shutil
+import time
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Product
@@ -56,3 +59,22 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
     db.delete(product)
     db.commit()
     return None
+
+
+IMAGES_DIR = "/app/images"
+os.makedirs(IMAGES_DIR, exist_ok=True)
+
+@router.post("/upload-image")
+async def upload_image(file: UploadFile = File(...)):
+    allowed = ["image/jpeg", "image/png", "image/webp"]
+    if file.content_type not in allowed:
+        raise HTTPException(status_code=400, detail="Ficheiro tem de ser JPG, PNG ou WEBP")
+    
+    filename = f"{int(time.time())}_{file.filename.replace(' ', '-')}"
+    path = os.path.join(IMAGES_DIR, filename)
+
+    with open(path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return {
+        "url": f"http://localhost/images/products/{filename}"
+    }

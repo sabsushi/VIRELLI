@@ -305,7 +305,7 @@ The project presentation slides were also produced with AI assistance. AI was us
 #### 1. Core Architecture & Development Support
 During the initial phase of development, Artificial Intelligence was utilised as a theoretical and practical support tool to define and structure the API mechanics and user authentication flows.
 
-- **Token-Based Authentication Concepts:** Assisted in understanding the theoretical lifecycle and operation of JSON Web Tokens (JWT), client-side persistence strategies (`localStorage`), and secure transmission over HTTP headers (`Authorization: Bearer <token>`).
+
 - **FastAPI Backend Implementation:** Supported the structural code generation and route planning for the FastAPI Python framework, leveraging SQLAlchemy ORM patterns and Pydantic schemas for strict data validation.
 - **Full-Stack Integration:** Guided the continuous mapping of data layers, effectively bridging dynamic client-side rendering files in JavaScript (`js/components.js`, `js/render.js`) with specific asynchronous endpoints exposed by the API.
 
@@ -345,6 +345,29 @@ Resolved dynamic browser rendering errors caused by variable type crashes and as
 - **Objective:** Remove static data layers pre-populated directly into the client-side source code and transition the layout into a fully authenticated, dynamic catalog dashboard.
 - **AI Methodology Applied:** Replaced outdated local fallback mechanisms (storing mock product structures inside local browser arrays) with native JavaScript asynchronous `fetch` requests targeted at the server's `POST /products/` API endpoint. Implemented string-cleaning routines inside the backoffice admin interface panels, ensuring that human-input values containing currency markers (e.g., `€ 299.00`) are sanitised into valid numbers (`floats`) before being validated against the FastAPI Pydantic parsing schemas.
 
+ ### 5. Backend Architecture & Database Object-Relational Mapping (ORM)
+**Objective** — Establish a decoupled, scalable, and highly organized backend structure to handle data persistence, business logic, and cross-origin client requests.
+
+**Approach** — The backend architecture was systematically segregated into distinct functional layers using FastAPI, separating database models, validation contracts, and API routes to enforce a strict separation of concerns:
+* **`models.py` (SQLAlchemy Layer):** Defines the physical database schema and relational structures (e.g., users, products, orders, and wishlist items) mapped directly to the SQLite database. It establishes data types, primary keys, and foreign key constraints.
+* **`schemas.py` (Pydantic Layer):** Functions as the data validation and serialization matrix. It intercepts incoming HTTP request payloads, performing strict type coercion and sanitization before the data reaches the database layer, returning explicit `422 Unprocessable Entity` errors if contracts are violated.
+* **`routes/` (Controller Layer):** Houses the modularized API endpoints (e.g., `/auth`, `/products`, `/wishlist`, `/checkout`). These Python routes serve as the execution layer, processing asynchronous client demands.
+
+**Client-Server Connectivity via Fetch API:**
+The synchronization between the vanilla JavaScript frontend and the Python backend is executed entirely through asynchronous HTTP requests utilizing the native browser `fetch()` API. The frontend dispatches structured JSON payloads alongside appropriate authorization headers containing the user session token. The FastAPI routing mechanisms capture these headers, extract the client identifiers, execute the queried database operations, and stream a JSON response back to the client UI to dynamically mutate the DOM without forcing complete page reloads.
+
+---
+
+### 6. Containerized Image Pipeline & Docker Bind Mounts
+**Objective** — Enable seamless media upload pipelines from the administrative dashboard to the isolated backend environment while ensuring real-time asset availability on the web server frontend.
+
+**Approach** — Because the application executes within completely isolated Docker containers (FastAPI for the backend and Nginx for the frontend), direct container-to-container file sharing is restricted by default. To circumvent this without relying on complex external cloud storage providers, a dual **Deterministic Bind Mount (Docker Volumes)** strategy was implemented within the `docker-compose.yml` orchestrator:
+
+1. **Backend Target Volume (`/app/images`):** The Python backend declares a local directory variable via `os.makedirs("/app/images")` to receive and process raw binary data streams from administrative product uploads. In the Docker Compose layer, this internal path is bound directly to the host machine's directory at `./frontend/images/products`.
+2. **Frontend Mirroring:** Concurrently, the Nginx container mounts the host's entire `./frontend` folder into its web-root directory (`/usr/share/nginx/html`).
+
+**Execution Lifecycle:**
+When an administrator uploads a new product image, the FastAPI container writes the file bytes to its local `/app/images` path. The Docker volume instantly reflects this change on the host's physical storage layer. Since Nginx mirrors that exact directory branch, the new media file immediately becomes accessible to the web server, allowing the frontend client to seamlessly resolve and display product images via static asset URLs.
 ---
 
 ## User Guide

@@ -143,7 +143,7 @@ DATABASE_URL=sqlite:////app/virelli.db
 
 ## Features
 
-- **Catalogue** — browse all products, filter by size, category, price range and collection group
+- **Catalog** — browse all products, filter by size, category, price range and collection group
 - **Product detail** — image, description, size selection, add to bag
 - **Cart** — persistent across page navigation (localStorage), quantity controls
 - **Wishlist / Favourites** — save items, move to cart from drawer
@@ -305,7 +305,7 @@ The project presentation slides were also produced with AI assistance. AI was us
 #### 1. Core Architecture & Development Support
 During the initial phase of development, Artificial Intelligence was utilised as a theoretical and practical support tool to define and structure the API mechanics and user authentication flows.
 
-
+- **Cryptographic Authentication (JWT):** Assisted in replacing the legacy static token system with an industry-standard OAuth2 architecture using JSON Web Tokens (JWT).
 - **FastAPI Backend Implementation:** Supported the structural code generation and route planning for the FastAPI Python framework, leveraging SQLAlchemy ORM patterns and Pydantic schemas for strict data validation.
 - **Full-Stack Integration:** Guided the continuous mapping of data layers, effectively bridging dynamic client-side rendering files in JavaScript (`js/components.js`, `js/render.js`) with specific asynchronous endpoints exposed by the API.
 

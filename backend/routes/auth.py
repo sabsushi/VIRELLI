@@ -1,3 +1,4 @@
+import models
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
@@ -12,23 +13,23 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/login", response_model=Token)
 def login(data: UserLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == data.email).first()
+    user = db.query(models.User).filter(models.User.email == data.email).first()
     if not user or not verify_password(data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_access_token({"sub": user.id})
-    return {"access_token": token, "token_type": "bearer"}
+    access_token = create_access_token(data={"sub": str(user.id)})
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 def register(data: UserRegister, db: Session = Depends(get_db)):
-    if db.query(User).filter(User.email == data.email).first():
+    if db.query(models.User).filter(models.User.email == data.email).first():
           raise HTTPException(status_code=400, detail="Email already registered")
-    if db.query(User).filter(User.username == data.username).first():
+    if db.query(models.User).filter(models.User.username == data.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
 
-    user = User(
+    user = models.User(
         username=data.username,
         email=data.email,
         hashed_password=hash_password(data.password)
@@ -37,5 +38,5 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    token = create_access_token({"sub": user.id})
-    return {"access_token": token, "token_type": "bearer"}
+    access_token = create_access_token(data={"sub": str(user.id)})
+    return {"access_token": access_token, "token_type": "bearer"}

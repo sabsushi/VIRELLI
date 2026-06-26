@@ -17,7 +17,6 @@ def add_to_wishlist(data: Wishlist, db: Session = Depends(get_db), current_user:
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-
     exists = db.query(WishlistItem).filter(
         WishlistItem.user_id == current_user.id,
         WishlistItem.product_id == data.product_id,
@@ -28,7 +27,6 @@ def add_to_wishlist(data: Wishlist, db: Session = Depends(get_db), current_user:
         db.delete(exists)
         db.commit()
         return {"detail": "Removed from wishlist"}
-
 
     new_item = WishlistItem(
         user_id=current_user.id,
@@ -41,22 +39,22 @@ def add_to_wishlist(data: Wishlist, db: Session = Depends(get_db), current_user:
     db.commit()
     return {"detail": "Added to wishlist"}
 
+
 @router.get("/me")
 def get_my_wishlist(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-
     results = (
-        db.query(WishlistItem, Product.name)
+        db.query(WishlistItem, Product)
         .join(Product, WishlistItem.product_id == Product.id)
         .filter(WishlistItem.user_id == current_user.id)
         .all()
     )
     
     wishlist_items = []
-    for item, product_name in results:
+    for item, product in results:
         wishlist_items.append({
             "id": item.id,
             "product_id": item.product_id,
-            "product_name": product_name,  
+            "product_name": product.name,  
             "size": item.size,
             "added_at": item.added_at
         })
